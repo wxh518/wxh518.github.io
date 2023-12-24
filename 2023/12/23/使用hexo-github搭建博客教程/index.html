@@ -173,7 +173,7 @@
 
             <span class="meta-info-item post-update-date">
                 <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                <span class="pc" data-updated="Sun Dec 24 2023 12:18:28 GMT+0800">2023-12-24 12:18:28</span>
+                <span class="pc" data-updated="Sun Dec 24 2023 19:29:03 GMT+0800">2023-12-24 19:29:03</span>
             </span>
         
 
@@ -208,28 +208,44 @@
                 <div class="post-content keep-markdown-body">
                     
 
-                    <ul>
-<li><p>前置下载</p>
-<p>Node环境下载、npm全局安装hexo脚手架</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
-</li>
+                    <h3 id="前置下载"><a href="#前置下载" class="headerlink" title="前置下载"></a>前置下载</h3><p>  Node环境下载、npm命令全局安装hexo脚手架</p>
+  <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+
+<h3 id="本地博客搭建"><a href="#本地博客搭建" class="headerlink" title="本地博客搭建"></a>本地博客搭建</h3><ul>
 <li><p>创建自己的博客</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo init blog</span><br></pre></td></tr></table></figure>
 
-<p>脚手架会帮你创建名为blog的文件夹，里面有一系列的文件，先本地跑起来再说。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo server 本地查看</span><br></pre></td></tr></table></figure>
+<p>脚手架会帮你创建名为blog的文件夹，里面有一系列的文件，先本地跑起来再说。blog文件夹下目录长这个样子😊</p>
+<img   src="/2023/12/23/%E4%BD%BF%E7%94%A8hexo-github%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/hexo_default_generate.png"  class="" title="Hexo创建博客产物">
 </li>
-<li><p>将博客部署到github上</p>
-<ol>
-<li>首先注册一个GitHub账户</li>
-<li>新建一个仓库，名字为自己账户名字+.io，比如zhangsan.io</li>
-<li>在仓库的Settings标签页下面，选择网站使用哪个分支的产物，最好改为master主分支</li>
-</ol>
-</li>
-<li><p>三条命令一套带走</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean 清理上一次编译结果</span><br><span class="line">hexo generate 生成</span><br><span class="line">hexo deploy 推到远程（需要安装一个依赖npm install hexo-deployer-git --save）</span><br></pre></td></tr></table></figure></li>
+<li><p>本地run起来</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo server 本地查看</span><br><span class="line">在浏览器中输入http:<span class="comment">//localhost:4000/，回车，博客网站就跑起来啦👏</span></span><br></pre></td></tr></table></figure>
+<img   src="/2023/12/23/%E4%BD%BF%E7%94%A8hexo-github%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/hexo_localhost.png"  class="" title="这是本地Hexo搭建好的样子"></li>
 </ul>
-<img   src="/2023/12/23/%E4%BD%BF%E7%94%A8hexo-github%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/back.jpeg"  class="" title="这是一张图片">
+<h3 id="将博客部署到Github上"><a href="#将博客部署到Github上" class="headerlink" title="将博客部署到Github上"></a>将博客部署到Github上</h3><ol>
+<li>首先需要注册一个GitHub账户</li>
+<li>新建一个仓库，名字为自己账户名字+.github.io，比如zhangsan.github.io</li>
+<li>在仓库的Settings标签页下面，选择网站使用哪个分支的产物，最好改为master主分支</li>
+<li>修改目录下的_config.yml中的deploy字段，映射到上面GitHub中的设置。<br><img   src="/2023/12/23/%E4%BD%BF%E7%94%A8hexo-github%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/hexo_deploy.png"  class="" title="这是配置Github仓库的图片"></li>
+</ol>
+<ul>
+<li><p>最后三条命令一套带走，每次发布最新文章都是这一套操作哦</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">先安装一个依赖用于hexo deploy命令：npm install hexo-deployer-git --save</span><br><span class="line">hexo clean 清理上一次编译结果</span><br><span class="line">hexo generate 编译生成</span><br><span class="line">hexo deploy 推到远程</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="更换主题"><a href="#更换主题" class="headerlink" title="更换主题"></a>更换主题</h3><p>  hexo有很多主题可供更换，我以keep主题为例来记录下操作流程，其他主题应该类似</p>
+<ul>
+<li>安装主题<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-theme-keep</span><br></pre></td></tr></table></figure></li>
+<li>修改根目录下的_config.yml，将theme配置字段修改为keep<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">theme: keep</span><br></pre></td></tr></table></figure></li>
+<li>设置好主题之后，对该主题生效的配置就都在对应主题目录下的_config.yml中生效了，比如修改主页标题、作者等信息。</li>
+</ul>
+<h3 id="图片问题"><a href="#图片问题" class="headerlink" title="图片问题"></a>图片问题</h3><p>  目前发现两种可以使用图片的方法，并且在浏览器中可以正常展示</p>
+<ul>
+<li>keep主题自带方法<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注意需要将图片放到主题下面的images文件夹下才可使用这种方法</span></span><br><span class="line">![](/images/back.jpeg)</span><br></pre></td></tr></table></figure></li>
+<li>安装hexo-assert-image依赖方法<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下载依赖</span></span><br><span class="line">npm install hexo-assert-image --save</span><br><span class="line"><span class="comment">// 使用格式</span></span><br><span class="line">&#123;% asset_img back.jpeg 这是一张图片 %&#125;</span><br></pre></td></tr></table></figure>
+这个方法需要改下hexo的配置，需要去外层_config.yml中将post_asset_folder字段改为true，这时当我们用hexo new ‘xxx’文章时，hexo会同时生成xxx文件夹和xxx.md文件，这时在xxx.md中使用上述格式使用的文件必须放在xxx文件夹下才可正常使用。</li>
+</ul>
+<h3 id="文章保存问题（建议）"><a href="#文章保存问题（建议）" class="headerlink" title="文章保存问题（建议）"></a>文章保存问题（建议）</h3><p>  由于我们写的每一个md文件是一篇文章，并且这些md文件保存在source&#x2F;_posts文件夹下，所以这个文件夹就显得特别重要，所以建议还是建一个git仓库，只存储md文件，这样就不用担心作业丢的问题啦🤣</p>
+  <img   src="/2023/12/23/%E4%BD%BF%E7%94%A8hexo-github%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/back.jpeg"  class="" title="这是一张图片">
 
                 </div>
 
