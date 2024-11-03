@@ -9,7 +9,7 @@
     
     <title>
         
-            Archive: 2024 |
+            chat |
         
         王大航的博客
     </title>
@@ -84,7 +84,7 @@
                     </li>
                     
                         <li class="menu-item">
-                            <a class="active"
+                            <a class=""
                                href="/archives"
                             >ARCHIVES</a>
                         </li>
@@ -110,7 +110,7 @@
             </li>
             
                 <li class="drawer-menu-item flex-center">
-                    <a class="active"
+                    <a class=""
                        href="/archives"
                     >ARCHIVES</a>
                 </li>
@@ -130,43 +130,139 @@
             <div class="main-content border-box">
                 
 
-                    <div class="fade-in-down-animation">
-    <div class="archives-container">
-        <div class="archives-timeline border-box">
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
             
-<div class="archive-list-container border-box">
-    
-        <section class="archive-item border-box">
-            <div class="archive-item-header border-box">
-                <span class="archive-year">2024</span>
-            </div>
-            <ul class="archive-item-body border-box">
+
+            <div class="post-content-bottom border-box">
                 
-                    <li class="post-item border-box">
-                        <span class="post-date border-box">11-03</span>
-                        <a class="post-title border-box text-ellipsis"
-                           href="/2024/11/03/chat/"
-                        >chat</a>
-                    </li>
+                    <div class="post-title">
+                        chat
+                    </div>
                 
-                    <li class="post-item border-box">
-                        <span class="post-date border-box">01-07</span>
-                        <a class="post-title border-box text-ellipsis"
-                           href="/2024/01/07/bind/"
-                        >bind</a>
-                    </li>
+
                 
-            </ul>
-        </section>
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/avatar.svg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">wangxiaohang</span>
+                                
+                                    <span class="author-badge">Lv1</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-check"></i>&nbsp;
+                <span class="pc">2024-11-03 20:26:22</span>
+                <span class="mobile">2024-11-03 20:26</span>
+            </span>
+
+            <span class="meta-info-item post-update-date">
+                <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                <span class="pc" data-updated="Sun Nov 03 2024 20:30:51 GMT+0800">2024-11-03 20:30:51</span>
+            </span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+    </div>
+
     
 </div>
 
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body">
+                    
+
+                    <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>随着接触到了桌面软件开发的另一种框架：<a class="link"   target="_blank" rel="noopener" href="https://www.electronjs.org/" >Electron<i class="fas fa-external-link-alt"></i></a>，并使用前端框架<a class="link"   target="_blank" rel="noopener" href="https://vuejs.org/" >Vue<i class="fas fa-external-link-alt"></i></a>进行UI界面开发，同时接触到了<a class="link"   target="_blank" rel="noopener" href="https://ts.nodejs.cn/" >TypeScript<i class="fas fa-external-link-alt"></i></a>语言以及<a class="link"   target="_blank" rel="noopener" href="https://nodejs.org/zh-cn" >NodeJs<i class="fas fa-external-link-alt"></i></a>运行时。让我发现了C++开发的笨重，可以这样说：学会了JavaScript，前端、后端、桌面端软件都可以开发出来，并且效率很高。很快就能搭建出来一个系统，而不像C++一样，连一个http请求都要引入curl库，并需要写许多代码才能实现接口请求。<br>当然，技术知识的背后原理是相当重要的，但是最应该着手的，是应该先让一个系统、程序跑起来。程序如果没有跑起来，学习再多的理论知识也是徒劳，当程序开发调试的过程中，遇到问题再反哺到技术文档上，这样学到的原理知识理解也会更加深刻与透彻。</p>
+<h3 id="不能光说不练"><a href="#不能光说不练" class="headerlink" title="不能光说不练"></a>不能光说不练</h3><p>所以准备做一个聊天系统，分为服务端与桌面客户端，使得各个客户端之间可以做到消息实时通信。</p>
+<h3 id="兵马未动-文档先行"><a href="#兵马未动-文档先行" class="headerlink" title="兵马未动 文档先行"></a>兵马未动 文档先行</h3><p>设计一个系统之前，最好列一个思维导图，这样使得每一步的工作更加清晰，同时让别人看你的架构更容易理解。废话少说，直接上图：</p>
+<img   src="/2024/11/03/chat/chat.png"  class="" title="这是一张图片">
+
+<p>主要技术框架为：</p>
+<ul>
+<li>桌面端：Electron+Vue</li>
+<li>后端：Express</li>
+<li>实时通信：WebSocket</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这里初步预想了下聊天系统的技术方案，具体的设计思路与代码程序后面文章进行补充。</p>
+
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2024/01/07/bind/"
+                                   title="bind"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">bind</span>
+                                        <span class="post-nav-item">Next posts</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
         </div>
+
+        
     </div>
-    
-
-
-
 </div>
 
 
@@ -210,6 +306,19 @@
     </div>
 
     <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="tools-list border-box">
+        <!-- PC TOC show toggle -->
+        
+
+        <!-- PC go comment -->
+        
+    </ul>
+</div>
+
+        </div>
     
 
     <!-- side tools -->
@@ -293,6 +402,20 @@
 
 
 <div class="">
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
     
 
     <!-- category-page -->
