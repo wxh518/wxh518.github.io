@@ -6,3 +6,7 @@ dist/
 *.tsbuildinfo
 .preview-*.log
 .deployment-repo/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+worker-dist/

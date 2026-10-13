@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["worker", "tests", "src/data", "src/types", "src/services/config-content-service.ts", "src/services/http-content-service.ts"]
+}

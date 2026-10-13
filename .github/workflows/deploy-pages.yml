@@ -27,6 +27,10 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Test content API and frontend adapter
+        run: npm test
+      - name: Validate Worker bundle
+        run: npm run build:api
       - name: Typecheck and build
         run: npm run build
       - name: Upload site
