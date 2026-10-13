@@ -1,0 +1,25 @@
+import type { Post } from '../types/content'
+
+// Markdown body is separate from the visual components, ready for an API or CMS.
+export const posts: Post[] = [
+  {
+    slug: 'a-home-on-the-web',
+    title: '在互联网上，留一小块自己的地方',
+    description: '从一张个人名片开始，记录创造、学习与生活中的小小发现。',
+    publishedAt: '2026-10-13', tags: ['随笔', 'Web'], readingMinutes: 3,
+    body: `> 这是一篇占位文章，用来预览未来技术博客的阅读体验。\n\n## 为什么想做一个个人主页\n\n社交平台里的信息总是不断向前流动。一个个人网站可以慢一点：把喜欢的作品、认真做过的项目、暂时没有答案的问题，放在同一个地方。\n\n这个空间不需要定义一个人的全部。它只需要告诉来访者：最近，我在对什么感到好奇。\n\n## 从小处开始\n\n- 放上一个你愿意分享的项目。\n- 写下一个你刚刚想明白的问题。\n- 留下一个能够找到你的方式。\n\n内容会逐渐长出来。布局和动画只是让这些内容更容易被发现。\n\n## 保持开放\n\n未来这里会有真实的技术笔记、开发记录，以及一些值得保存的想法。现在，它还是一张可以自由改写的草稿。`,
+  },
+  {
+    slug: 'designing-a-content-layer',
+    title: '把内容和页面分开：一个小型数据层',
+    description: '让本地配置与远程接口使用同一份契约，页面只关心如何展示。',
+    publishedAt: '2026-10-10', tags: ['TypeScript', '架构'], readingMinutes: 5,
+    body: `> 示例技术文章。这里的代码展示了本项目采用的数据访问方式。\n\n## 先定义契约\n\n页面不应该知道内容来自一个本地文件，还是远程服务。定义一个小接口，让不同的数据来源实现相同的方法。\n\n~~~typescript\ninterface ContentService {\n  getHomepage(signal?: AbortSignal): Promise<HomepageContent>\n  getPosts(signal?: AbortSignal): Promise<PostSummary[]>\n  getPost(slug: string, signal?: AbortSignal): Promise<Post | null>\n}\n~~~\n\n## 本地和远程使用同一条路径\n\n开发阶段，本地适配器返回配置文件中的内容。接入后端时，HTTP 适配器负责请求、取消和错误处理。React 组件通过统一的 hook 获取数据。\n\n这样做的收益是：更换数据来源时，视觉组件可以保持稳定。\n\n## 不要忘记状态\n\n加载中、请求失败、内容不存在，都属于页面体验。与其在每个组件里反复处理，不如在数据入口统一表达。\n\n文章正文使用 **Markdown**，可以逐步接入文件、CMS 或自己的内容接口。`,
+  },
+  {
+    slug: 'motion-with-purpose', title: '让动效成为反馈，而不仅是装饰',
+    description: '关于滚动入场、视差、交互反馈，以及给动画留一个暂停键。',
+    publishedAt: '2026-10-06', tags: ['交互', 'Motion'], readingMinutes: 4,
+    body: `> 这是一篇动效设计的占位笔记。\n\n## 一个动作，一个理由\n\n入场动画帮助读者注意到新内容。悬停反馈告诉读者这里可以交互。卡片之间的连线解释了项目与技能的关系。\n\n当动画对应清晰的含义时，界面会更容易理解。\n\n## 轻一点\n\n频繁改变布局的动画容易干扰阅读。可以优先考虑透明度和变换，让内容的位置保持可预测。\n\n## 把选择交给读者\n\n持续旋转和滚动的装饰应该能够暂停。系统的减少动态效果设置，也应得到尊重。手机上的体验需要重新检查，而不是简单缩小桌面页面。`,
+  },
+]
