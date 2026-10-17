@@ -10,12 +10,13 @@
     "schemaVersion": { "const": 1, "description": "文章配置结构版本，当前为 1；与单篇文章的发布日期无关。" },
     "posts": {
       "type": "array",
-      "description": "已公开的文章，接口按配置顺序返回；空数组表示暂无文章，不包含草稿或私密内容。",
+      "description": "文章清单，支持草稿与公开文章；公开接口只返回公开文章。空数组表示暂无文章，前台列表按发布日期排序。",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["slug", "title", "description", "publishedAt", "tags", "readingMinutes", "body"],
         "properties": {
+          "status": { "type": "string", "enum": ["draft", "published"], "description": "文章可见性：draft 为未公开草稿，published 为公开文章；旧数据省略此字段时视为公开。新建文章默认草稿，发布全站配置时仍不会公开它。" },
           "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "description": "唯一且稳定的文章地址标识，例如 designing-a-content-layer；发布后修改会影响原有链接，未来可作为数据库唯一键。" },
           "title": { "type": "string", "minLength": 1, "description": "文章标题。" },
           "description": { "type": "string", "description": "文章摘要，用于列表展示和关键词搜索。" },

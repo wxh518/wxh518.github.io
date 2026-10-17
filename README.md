@@ -4,13 +4,15 @@
 
 站点地址：[wxh518.github.io](https://wxh518.github.io/)。博客入口：[文章列表](https://wxh518.github.io/#/blog)。
 
+内容管理入口：[可视化工作台](https://wxh518.github.io/#/admin)。支持中文表单、图片上传、Markdown 文章、草稿预览、一键发布、JSON 备份和发布历史；线上内容保存在 Cloudflare D1，日常更新无需提交代码。初始登录信息只在本机 `.deployment-repo/admin-access.txt`，首次登录后可自行改密。详见 [工作台使用与架构](docs/content-studio.md)。
+
 后端地址：[内容 API](https://wxh518-homepage-api.orbit-homepage.workers.dev/)，[健康检查](https://wxh518-homepage-api.orbit-homepage.workers.dev/api/health)。
 
 ## GitHub Pages 发布
 
 仓库 `wxh518/wxh518.github.io` 使用 `.github/workflows/deploy-pages.yml` 自动发布前端。向 `master` 推送后，GitHub Actions 使用 Node.js 22 安装锁定依赖，执行接口测试、Worker 打包检查、前后端 TypeScript 检查和前端生产构建，再把 `dist/` 发布到 GitHub Pages。也可以在 Actions 中手动运行该工作流。
 
-后端通过本机 Wrangler 发布到 Cloudflare。首次使用运行 `npx wrangler login` 并在浏览器授权；发布目标由 `wrangler.jsonc` 指定。修改接口或配置数据后，先发布后端，再推送源码：
+后端通过本机 Wrangler 发布到 Cloudflare。首次使用运行 `npx wrangler login` 并在浏览器授权；发布目标由 `wrangler.jsonc` 指定。修改接口代码后，先发布后端，再推送源码；日常内容更新直接在工作台发布：
 
 ```sh
 npm test
@@ -21,7 +23,7 @@ git commit -m "Update homepage content"
 git push origin master
 ```
 
-仓库 Settings → Pages → Source 应为 **GitHub Actions**。`.env.production` 保存公开的 Worker API 地址，构建时写入前端；修改它后需要重新构建。当前 GitHub 工作流只自动发布前端，**不会自动更新 Worker**，因此修改 `content/` 中的数据后也要执行 `npm run deploy:api`。纯界面修改只需推送。
+仓库 Settings → Pages → Source 应为 **GitHub Actions**。`.env.production` 保存公开的 Worker API 地址，构建时写入前端；修改它后需要重新构建。当前 GitHub 工作流只自动发布前端，**不会自动更新 Worker**。纯界面修改只需推送。D1 初始化后，修改 `content/` 种子文件不会覆盖已保存的线上内容。
 
 不需要提交 `dist/`、`worker-dist/` 或 `.wrangler/`，也不要将登录凭据写入仓库。GitHub Actions 不需要 Cloudflare Token；以后如需自动发布后端，可另行配置有 Workers 发布权限的 CI 凭据。
 
@@ -31,6 +33,8 @@ git push origin master
 
 ```sh
 npm install
+npm run db:migrate
+npm run setup:admin
 npm run dev:api
 ```
 
@@ -115,16 +119,16 @@ VITE_CONTENT_API_URL=https://wxh518-homepage-api.orbit-homepage.workers.dev/api
 
 | 方法与地址 | 返回契约 |
 | --- | --- |
-| `GET /health` | `{ status: 'ok', schemaVersion: 1, source: 'config' }`，用于验证接口在线 |
+| `GET /health` | `{ status: 'ok', schemaVersion: 1, source: 'd1'（无数据库时为 config） }`，用于验证接口在线 |
 | `GET /homepage` | `HomepageContent`，包含 `schemaVersion: 1` |
 | `GET /posts` | `PostSummary[]`，不包含正文 |
 | `GET /posts/:slug` | `Post`，包含 Markdown `body`；文章不存在时返回 404 |
 
 上表路径均位于 `/api` 下。文章列表不返回 Markdown 正文，打开详情时再单独请求。接口字段映射与数据存储集中在适配器，页面组件不直接调用 `fetch`。请求支持 AbortSignal 取消和 15 秒超时；服务错误会显示重试入口，404 文章显示独立空状态。前端检查主页的关键顶层结构及文章字段；未来接入不受控的数据源时，应扩展为完整的运行时 schema 校验。
 
-Worker 只提供公开的只读内容接口，拒绝写入方法；正常内容响应允许浏览器缓存 60 秒，错误和健康检查不缓存。CORS 允许 `https://wxh518.github.io` 及配置的本地开发来源；CORS 是浏览器跨域规则，不是身份认证。后续若增加管理或写入接口，需要单独实现认证和权限校验。
+公开内容接口保持只读，正常内容响应允许浏览器缓存 60 秒，错误和健康检查不缓存。`/api/admin/*` 提供有密码和短期会话保护的独立管理接口，所有管理响应均不缓存。CORS 允许 `https://wxh518.github.io` 及配置的本地开发来源；CORS 是浏览器跨域规则，管理鉴权另行验证。
 
-`VITE_*` 环境变量会进入公开的浏览器代码，不用于存放秘密。当前 `content/*.json` 仍是唯一内容来源：文件通过静态导入打包进 Worker，修改配置后重新部署 Worker 即可更新内容，现阶段没有数据库，也没有在线修改内容的后台。未来数据库适配器实现 `ContentService`，通过 `createApp(content)` 注入即可；无需改动页面或现有 HTTP 响应结构。
+`VITE_*` 环境变量会进入公开的浏览器代码，不用于存放秘密。线上内容来自 D1 的已发布快照；JSON 仅用于首次初始化、离线模式和无数据库环境。写入入口复用 Schema 与跨字段校验；公开页面维持原有 `ContentService` 和 HTTP 响应结构。密码摘要使用 Worker Secret 或 D1 覆盖记录，均不会进入前端构建。
 
 ## 博客与静态托管
 
@@ -150,4 +154,4 @@ Time 使用 500×300 坐标系的平滑堆叠面积图，年龄按实际间距�
 
 ## 已完成验证
 
-前后端 TypeScript 检查、JSON 配置校验、23 项配置 / 接口 / 客户端 / 图形几何测试、Worker 打包检查；桌面 / 390px 手机预览；作品弹窗、书架切换、手机菜单、动画暂停、文章搜索、Markdown 代码块和文章深链接刷新。
+前后端 TypeScript 检查、JSON 配置校验、31 项配置 / 管理鉴权 / SQLite 持久化与历史 / 接口 / 客户端 / 图形几何测试、Worker 打包检查；桌面 / 390px 手机预览；作品弹窗、书架切换、手机菜单、动画暂停、文章搜索、Markdown 代码块和文章深链接刷新。工作台验证资料保存、草稿预览、发布、图片上传、文章草稿和备份恢复。

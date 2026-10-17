@@ -16,8 +16,13 @@
     "deploy:api": "wrangler deploy",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc -b && tsc -p tsconfig.worker.json",
-    "validate:content": "tsx scripts/validate-content.ts",
-    "test": "tsx --test tests/content-api.test.ts tests/http-content-service.test.ts tests/content-config.test.ts tests/chart-geometry.test.ts"
+    "generate:validators": "tsx scripts/generate-validators.ts",
+    "validate:content": "npm run generate:validators && tsx scripts/validate-content.ts",
+    "pretest": "npm run generate:validators",
+    "test": "tsx --test tests/*.test.ts",
+    "setup:admin": "tsx scripts/setup-admin.ts",
+    "db:migrate": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
     "@fontsource/coda": "^5.2.6",
@@ -37,6 +42,7 @@
     "@vitejs/plugin-react": "^5.0.3",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "esbuild": "^0.28.2",
     "tailwindcss": "^4.1.13",
     "tsx": "^4.23.15",
     "typescript": "~5.9.2",

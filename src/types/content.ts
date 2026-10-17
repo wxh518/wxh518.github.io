@@ -69,7 +69,7 @@ export interface PostSummary {
   tags: string[]
   readingMinutes: number
 }
-export interface Post extends PostSummary { body: string }
+export interface Post extends PostSummary { body: string; status?: 'draft' | 'published' }
 export interface ContentService {
   getHomepage(signal?: AbortSignal): Promise<HomepageContent>
   getPosts(signal?: AbortSignal): Promise<PostSummary[]>

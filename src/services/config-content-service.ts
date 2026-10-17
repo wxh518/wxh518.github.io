@@ -12,7 +12,7 @@ export interface ConfigContentSource {
 export function createConfigContentService(source: ConfigContentSource): ContentService {
   // 保留独立快照，调用方修改输入或查询结果都不会污染下一次请求。
   const homepage = structuredClone(source.homepage)
-  const posts = structuredClone(source.posts)
+  const posts = structuredClone(source.posts).filter(post => post.status !== 'draft')
   const postsBySlug = new Map(posts.map(post => [post.slug, post]))
   // 明确列出公开摘要字段，避免以后新增正文或存储专用字段时意外泄露。
   const summaries: PostSummary[] = posts.map(post => ({
@@ -34,7 +34,8 @@ export function createConfigContentService(source: ConfigContentSource): Content
 // JSON Schema 在开发、构建和部署前校验；编辑器元数据不属于 HTTP 数据契约。
 // Workers 没有本机文件路径：这里的 JSON 导入会由 Wrangler 打包进 Worker。
 const { $schema: _schema, ...homepage } = homepageFile
-export const configContentService = createConfigContentService({
+export const configContentSource: ConfigContentSource = {
   homepage: homepage as HomepageContent,
-  posts: postsFile.posts,
-})
+  posts: postsFile.posts as Post[],
+}
+export const configContentService = createConfigContentService(configContentSource)

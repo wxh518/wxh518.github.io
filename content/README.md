@@ -1,6 +1,6 @@
 # 内容配置维护指南
 
-主页与博客的可编辑数据只存放在本目录的 JSON 中，组件和路由不保存个人资料或文章正文。
+日常内容请使用[可视化工作台](https://wxh518.github.io/#/admin)，填写后保存草稿、预览并发布即可。线上内容已持久化到 Cloudflare D1，本目录 JSON 作为初始化种子与离线来源；数据库初始化后，修改 JSON 再部署不会覆盖线上内容。使用方法见 [工作台说明](../docs/content-studio.md)。组件和路由不保存个人资料或文章正文。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -79,14 +79,14 @@ npm run build
 
 `npm run dev`、`npm run dev:api`、`npm run build`、`npm run build:api` 和 `npm run deploy:api` 都通过 npm 的 `pre...` 脚本先执行配置校验。直接执行 `vite` 或 `wrangler` 会跳过这些项目脚本，因此日常使用以上 npm 命令。开发期间修改 JSON 后，Vite/Wrangler 会监听依赖变化；提交前再次执行校验和测试。
 
-Cloudflare Workers 使用打包时导入的 JSON 快照，不会读取本机 `D:` 盘，也不会在每次请求时访问 GitHub 文件。更新 JSON 后执行 `npm run deploy:api` 才会更新线上内容；已有客户端可能保留最多 60 秒的内容缓存。修改前端组件时再通过 Git 推送触发 GitHub Pages 发布。
+Cloudflare Workers 使用 D1 中的已发布快照，不会读取本机 `D:` 盘，也不会在每次请求时访问 GitHub 文件。打包时导入的 JSON 仅在数据库尚未初始化或无数据库环境下作为来源；更新种子文件不会覆盖数据库。工作台点击发布后，已有客户端最多保留约 60 秒内容缓存。修改前端组件时通过 Git 推送触发 GitHub Pages 发布。
 
 ## 数据访问设计与数据库迁移
 
 当前调用关系：
 
 ```text
-React 页面 → HTTP 内容适配器 → Hono 路由 → ContentService → JSON 配置适配器
+React 页面 → HTTP 内容适配器 → Hono 路由 → D1 已发布快照 → ContentService
 离线预览 ───────────────────────────────────────────────→ JSON 配置适配器
 ```
 
@@ -102,11 +102,11 @@ interface ContentService {
 }
 ```
 
-以后迁移 Cloudflare D1 或其他数据库时，新增实现这些方法的适配器，并在 Worker 创建应用时传入（现有 `createApp(content)` 已支持注入）。数据库中的主键、创建时间、草稿状态等内部字段由适配器映射，不直接作为公开响应。主页可以先存为一份 JSON 文档，文章可以以 `slug` 为唯一业务键分别存储；需要独立管理项目、书籍时再拆表。
+当前 D1 将主页和文章作为一个有修订号的 JSON 文档保存，并区分草稿、已发布快照和发布历史。`worker/database.ts` 把已发布快照转换为相同的 `ContentService`，草稿文章在公开适配器中过滤。以后需要独立管理项目、书籍或文章时，可以拆表或新增其他数据库适配器；`createApp(content)` 仍支持测试注入。
 
 页面和 HTTP 路由继续使用现有数据契约，Schema 约束的是当前 JSON 文件格式，未来不要求数据库表结构与文件完全相同。`schemaVersion` 表示结构版本，编辑名称、数量或正文时保持为 1；出现不兼容结构变化时，需要同步调整类型、Schema、适配器和客户端。
 
-Ajv 只用于 Node.js 下的开发和构建校验，不会进入 Worker 或浏览器，也不会在请求时动态编译 Schema。迁移到可在线写入的数据库后，需要在写入入口增加运行时校验与权限控制。
+Ajv 在 Node.js 构建阶段生成静态校验代码，浏览器和 Worker 复用静态函数及关联校验，不在请求时动态编译 Schema。管理接口发布前执行完整校验，并单独验证管理员会话。
 
 ## 布局与图表展示配置
 
