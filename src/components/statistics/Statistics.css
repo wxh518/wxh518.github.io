@@ -7,11 +7,11 @@
 .statistics-time { display: flex; flex-direction: column; flex-basis: 66.666667%; }
 .time-chart { position: relative; margin-top: 16px; padding-bottom: 6px; }
 .time-chart > svg { display: block; width: 100%; height: auto; border: 1px solid #ffffff33; border-radius: 16px; box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a; overflow: hidden; }
+.time-chart > svg:hover, .time-chart > svg:focus:not(:focus-visible) { outline: none; }
 .time-axis { font: 10px sans-serif; fill: #334155; }
 .time-axis line, .time-axis path { stroke: currentColor; fill: none; }
 .time-area-label { font: 300 16px ui-sans-serif, system-ui, sans-serif; fill: #334155; pointer-events: none; }
 .time-age-label { font: 400 16px ui-sans-serif, system-ui, sans-serif; fill: #334155; }
-.time-cursor { stroke: #334155; stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
 .statistics-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; flex-basis: 33.333333%; }
 .statistics-space { flex: 1; }
 .footprint-map { position: relative; margin-top: 16px; width: 100%; }
@@ -32,10 +32,6 @@
 .radar-area { fill-opacity: .25; stroke-width: 3; mix-blend-mode: multiply; }
 .radar-dot { stroke-width: 2; transition: r .15s; }
 .statistics-tooltip { position: absolute; z-index: 3; pointer-events: none; background: #fff; color: #334155; border-radius: 6px; box-shadow: 0 4px 12px #0002; padding: 12px; font: 13px/20px system-ui,sans-serif; }
-.time-tooltip { top: 12px; right: 12px; min-width: 170px; }
-.time-tooltip > span { display: flex; gap: 8px; align-items: center; }
-.time-tooltip i { width: 10px; height: 10px; }
-.time-tooltip b { margin-left: auto; }
 .radar-tooltip { bottom: 16px; left: 16px; display: flex; gap: 12px; }
 @keyframes footprint-pulse { 75%,100% { transform: scale(2); opacity: 0; } }
 @media(max-width:1023px) {
@@ -48,7 +44,6 @@
   .statistics-time, .statistics-space, .statistics-radar { padding: 24px; }
   .statistics-radar { min-height: 0; }
   .footprint-caption { font-size: 16px; padding-inline: 16px; }
-  .time-tooltip { font-size: 11px; line-height: 16px; top: 4px; right: 4px; padding: 8px; min-width: 145px; }
 }
 @media(prefers-reduced-motion:reduce) { .footprint-pulse { animation: none; } }
 .motion-paused .footprint-pulse { animation-play-state: paused; }
