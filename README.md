@@ -1,6 +1,6 @@
 # Orbit — 个人主页
 
-参考 [qzq.at](https://www.qzq.at/) 的布局与交互重新实现。前端使用 React、TypeScript、Vite、Tailwind CSS 和 Motion，后端使用 Cloudflare Workers、TypeScript 和 Hono。当前资料、数字、项目、文章和书籍都是演示内容；插画为本地 SVG 占位图。
+参考 [qzq.at](https://www.qzq.at/) 的布局与交互重新实现。前端使用 React、TypeScript、Vite、Tailwind CSS 和 Motion，后端使用 Cloudflare Workers、TypeScript 和 Hono。个人资料、项目介绍、文章和书籍为占位内容；部分公开图片和统计示例用于布局对照，后续可在 JSON 配置中替换。
 
 站点地址：[wxh518.github.io](https://wxh518.github.io/)。博客入口：[文章列表](https://wxh518.github.io/#/blog)。
 
@@ -21,7 +21,7 @@ git commit -m "Update homepage content"
 git push origin master
 ```
 
-仓库 Settings → Pages → Source 应为 **GitHub Actions**。`.env.production` 保存公开的 Worker API 地址，构建时写入前端；修改它后需要重新构建。当前 GitHub 工作流只自动发布前端，**不会自动更新 Worker**，因此修改 `src/data/` 后也要执行 `npm run deploy:api`。纯界面修改只需推送。
+仓库 Settings → Pages → Source 应为 **GitHub Actions**。`.env.production` 保存公开的 Worker API 地址，构建时写入前端；修改它后需要重新构建。当前 GitHub 工作流只自动发布前端，**不会自动更新 Worker**，因此修改 `content/` 中的数据后也要执行 `npm run deploy:api`。纯界面修改只需推送。
 
 不需要提交 `dist/`、`worker-dist/` 或 `.wrangler/`，也不要将登录凭据写入仓库。GitHub Actions 不需要 Cloudflare Token；以后如需自动发布后端，可另行配置有 Workers 发布权限的 CI 凭据。
 
@@ -44,6 +44,7 @@ npm run dev
 
 ```sh
 npm run typecheck
+npm run validate:content
 npm test
 npm run build:api
 npm run build
@@ -58,12 +59,16 @@ npm run preview
 
 | 文件 | 用途 |
 | --- | --- |
-| `src/data/homepage.ts` | 个人资料、社交账号、项目、技能、书架、统计数据、介绍文案与板块配置 |
-| `src/data/posts.ts` | 博客文章元数据与 Markdown 正文 |
+| `content/homepage.json` | 个人资料、社交账号、项目、技能、书架、统计数据、介绍文案与板块配置 |
+| `content/posts.json` | 博客文章元数据与 Markdown 正文，包含结构版本和 posts 数组 |
+| `content/schemas/` | 每个字段的中文说明、必填项、类型和格式校验规则 |
+| `content/README.md` | 配置示例、字段维护方式、发布流程与数据库迁移设计 |
+| `scripts/validate-content.ts` | 构建前的 JSON 读取和校验入口 |
+| `scripts/content-validation.ts` | JSON Schema 校验及重复标识、引用和图表约束检查 |
 | `src/types/content.ts` | 所有内容类型和 `ContentService` 接口契约 |
 | `worker/index.ts` | Hono HTTP 路由、跨域、缓存和错误响应 |
 | `wrangler.jsonc` | Worker 名称、本地端口和允许的前端来源 |
-| `src/services/config-content-service.ts` | 配置数据适配器；后端和可选的离线预览共用 |
+| `src/services/config-content-service.ts` | JSON 数据适配器、只读快照和文章索引；后端和可选的离线预览共用 |
 | `src/services/http-content-service.ts` | 前端 HTTP 适配器、15 秒超时、取消和响应检查 |
 | `src/services/content-service.ts` | 根据构建环境选择数据适配器 |
 | `tests/` | 路由、跨域、错误分支及真实前后端契约测试 |
@@ -73,8 +78,11 @@ npm run preview
 | `src/pages/Blog.tsx` | 博客列表、搜索、标签筛选与文章阅读页，按需加载 |
 | `src/Artwork.tsx` | 本地 SVG 占位封面 |
 | `src/styles.css` | 主题、布局、响应式规则与 CSS 动画 |
+| `src/styles/homepage.css` | 参照站点校准的页边距、名片、错叠卡片、拼贴布局和响应式规则 |
 
 ### 个人信息与项目
+
+内容维护详见 [content/README.md](content/README.md)。所有业务内容使用标准 JSON；字段的中文注释放在配套 JSON Schema 的 `description` 中，支持 Schema 的编辑器可显示悬停说明和补全。开发启动、构建和部署脚本会自动执行 `npm run validate:content`，拒绝未知字段、不合法数据和失效引用。
 
 `profile` 包含名称、轮换名字、身份列表、所在地、联系邮箱与社交链接。社交链接和邮箱默认为空，因此不会导向虚构的账户；点击会打开预览详情。
 
@@ -86,11 +94,11 @@ npm run preview
 
 `sections` 数组顺序就是主页板块顺序：
 
-```ts
-{ id: 'music', label: 'Music', enabled: true, inNavigation: true }
+```json
+{ "id": "music", "label": "Music", "enabled": true, "inNavigation": true }
 ```
 
-`enabled: false` 隐藏板块；`inNavigation` 控制是否加入顶部菜单。增加一种新板块时：扩展 `SectionId` 和相应内容类型，新增展示组件，在 `App.tsx` 的 `sectionComponents` 中注册，再加入配置数组。
+`enabled: false` 隐藏板块；`inNavigation` 控制是否加入顶部菜单。关闭板块时，需要调整 `profile.roles[].target`，避免链接指向隐藏板块。增加一种新板块时：扩展 `SectionId`、相应内容类型和 Schema，新增展示组件，在 `App.tsx` 的 `sectionComponents` 中注册，再加入配置数组。
 
 目前保留具名板块类型，而没有引入通用页面编辑器或复杂的插件机制。
 
@@ -116,7 +124,7 @@ VITE_CONTENT_API_URL=https://wxh518-homepage-api.orbit-homepage.workers.dev/api
 
 Worker 只提供公开的只读内容接口，拒绝写入方法；正常内容响应允许浏览器缓存 60 秒，错误和健康检查不缓存。CORS 允许 `https://wxh518.github.io` 及配置的本地开发来源；CORS 是浏览器跨域规则，不是身份认证。后续若增加管理或写入接口，需要单独实现认证和权限校验。
 
-`VITE_*` 环境变量会进入公开的浏览器代码，不用于存放秘密。当前配置文件仍是唯一内容来源：修改配置后重新部署 Worker 即可更新内容，现阶段没有数据库，也没有在线修改内容的后台。
+`VITE_*` 环境变量会进入公开的浏览器代码，不用于存放秘密。当前 `content/*.json` 仍是唯一内容来源：文件通过静态导入打包进 Worker，修改配置后重新部署 Worker 即可更新内容，现阶段没有数据库，也没有在线修改内容的后台。未来数据库适配器实现 `ContentService`，通过 `createApp(content)` 注入即可；无需改动页面或现有 HTTP 响应结构。
 
 ## 博客与静态托管
 
@@ -128,10 +136,16 @@ Worker 只提供公开的只读内容接口，拒绝写入方法；正常内容�
 
 ## 可体验的交互
 
-首屏名字轮换、CSS 图标轨道、鼠标立体倾斜、双向社交卡片循环、数字增长、滚动入场与视差、技能/项目关联连线、作品详情弹窗、内容标签筛选、音乐波形、统计切换、书架分类与立体书封、手机菜单、博客搜索与文章页。
+首屏名字轮换、CSS 图标轨道、鼠标立体倾斜、双向社交卡片循环、数字增长、滚动入场与视差、技能/项目关联连线、作品详情弹窗、内容标签筛选、音乐波形、面积图及雷达图详情、书架分类与立体书封、手机菜单、博客搜索与文章页。
 
 顶部暂停按钮控制持续动画，尊重系统的“减少动态效果”设置。详情弹窗支持 Escape，书架分类支持左右方向键，手机上可点击查看桌面悬停内容。
 
+首页按参考站的 1024 / 1280 / 1536px 断点分别使用 64 / 128 / 176px 页边距；桌面名片为 412×458px。手机使用独立的名片尺寸和单列布局。轨道图标保存在 `public/images/orbit/`；参考站公开的头像、地图、作品和乐器演示素材保存在 `public/images/reference/`，来源记录见其中的 `sources.json`。这些是布局对照素材，不代表站点所有者的个人经历或作品；正式使用时替换为自己的图片。个人资料继续使用占位内容。
+
+演示静态图片已按网页展示尺寸生成 WebP，透明背景保留，GIF 动画保留原格式；参考素材总体积由约 16.3MB 降至 2.9MB。衍生文件映射见 `public/images/reference/web-assets.json`，本机原图备份在被 Git 忽略的 `.deployment-repo/reference-originals/`。
+
+Time 使用 500×300 坐标系的平滑堆叠面积图，年龄按实际间距映射，标签位置、颜色和百分比均由 JSON 配置。Movie / Album 为五层网格的雷达图，使用闭合 Cardinal 曲线并按容器宽度重算几何；Space 使用地图图片、百分比定位的头像及脉冲动画。图形组件和样式位于 `src/components/statistics/`，通用几何函数位于 `src/lib/chart-geometry.ts`，不依赖第三方图表库。
+
 ## 已完成验证
 
-前后端 TypeScript 检查、13 项接口及客户端测试、Worker 打包检查；桌面 / 390px 手机预览；作品弹窗、书架切换、手机菜单、动画暂停、文章搜索、Markdown 代码块和文章深链接刷新。
+前后端 TypeScript 检查、JSON 配置校验、23 项配置 / 接口 / 客户端 / 图形几何测试、Worker 打包检查；桌面 / 390px 手机预览；作品弹窗、书架切换、手机菜单、动画暂停、文章搜索、Markdown 代码块和文章深链接刷新。

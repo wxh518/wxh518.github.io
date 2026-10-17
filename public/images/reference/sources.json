@@ -1,0 +1,80 @@
+{
+  "usage": "来自 qzq.at 公开页面的视觉还原演示素材，路径可在 content/homepage.json 中替换。",
+  "assets": [
+    {
+      "name": "avatar.png",
+      "source": "https://www.qzq.at/_next/static/media/hero-circle.c18e5fff.png",
+      "bytes": 1134889
+    },
+    {
+      "name": "footprint.jpg",
+      "source": "https://www.qzq.at/_next/static/media/footprint.8c66cb7d.jpg",
+      "bytes": 190896
+    },
+    {
+      "name": "game-jam-1.jpeg",
+      "source": "https://www.qzq.at/_next/static/media/bath%20and%20moth.785d3ab9.jpeg",
+      "bytes": 86396
+    },
+    {
+      "name": "game-jam-2.png",
+      "source": "https://www.qzq.at/_next/static/media/naughty%20cat.6041a1b1.png",
+      "bytes": 3623379
+    },
+    {
+      "name": "game-jam-3.jpg",
+      "source": "https://www.qzq.at/_next/static/media/naughty%20boy.7e331171.jpg",
+      "bytes": 265072
+    },
+    {
+      "name": "company-game-1.jpg",
+      "source": "https://www.qzq.at/_next/static/media/Ring%20of%20Elysium.6e02c899.jpg",
+      "bytes": 73343
+    },
+    {
+      "name": "company-game-2.png",
+      "source": "https://www.qzq.at/_next/static/media/soul%20game.1f997a3b.png",
+      "bytes": 3042755
+    },
+    {
+      "name": "essay-1.png",
+      "source": "https://www.qzq.at/_next/static/media/bilibili-Unreal.911c5e4b.png",
+      "bytes": 409359
+    },
+    {
+      "name": "essay-2.png",
+      "source": "https://www.qzq.at/_next/static/media/bilibili-MBTI.622f780e.png",
+      "bytes": 260412
+    },
+    {
+      "name": "essay-3.jpeg",
+      "source": "https://www.qzq.at/_next/static/media/bilibili-Random.461eade3.jpeg",
+      "bytes": 301128
+    },
+    {
+      "name": "essay-4.jpeg",
+      "source": "https://www.qzq.at/_next/static/media/bilibili-Analyzor.ac82c4ec.jpeg",
+      "bytes": 364878
+    },
+    {
+      "name": "band.jpg",
+      "source": "https://www.qzq.at/_next/static/media/returnTrue.19e7052f.jpg",
+      "bytes": 193435
+    },
+    {
+      "name": "live-music.gif",
+      "source": "https://www.qzq.at/_next/static/media/decentralizedMusic.3c414c41.gif",
+      "bytes": 916913
+    },
+    {
+      "name": "microfreak.png",
+      "source": "https://www.qzq.at/_next/static/media/syth-microfreak.6722bf2c.png",
+      "bytes": 1533774
+    },
+    {
+      "name": "op1.png",
+      "source": "https://www.qzq.at/_next/static/media/synth-op1-3.d495c815.png",
+      "bytes": 3931307
+    }
+  ]
+}

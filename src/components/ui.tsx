@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { motion, useInView, useMotionValue, useSpring, useTransform } from 'motion/react'
-import { ArrowUpRight, BookOpen, Code2, Github, Instagram, Music2, Radio, X } from 'lucide-react'
+import { ArrowUpRight, BookOpen, Github, Instagram, Music2, Radio, X } from 'lucide-react'
 import { Artwork } from '../Artwork'
 import type { Project } from '../types/content'
 
@@ -19,13 +19,9 @@ export function BrandIcon({ name, size = 22 }: { name: string; size?: number }) 
   return <Radio size={size} />
 }
 
-export function ReactMark() {
-  return <svg viewBox="-52 -48 104 96" aria-hidden="true"><g fill="none" stroke="currentColor" strokeWidth="4"><ellipse rx="48" ry="18" /><ellipse rx="48" ry="18" transform="rotate(60)" /><ellipse rx="48" ry="18" transform="rotate(120)" /></g><circle r="8" fill="currentColor" /></svg>
-}
-
-export function Reveal({ children, className = '', id, delay = 0 }: { children: ReactNode; className?: string; id?: string; delay?: number }) {
+export function Reveal({ children, className = '', id, delay = 0, distance = 30 }: { children: ReactNode; className?: string; id?: string; delay?: number; distance?: number }) {
   const { animated } = useExperience()
-  return <motion.section id={id} className={className} initial={animated ? { opacity: 0, y: 38, scale: .98 } : false} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, margin: '0px 0px -35px 0px' }} animate={!animated ? { opacity: 1, y: 0, scale: 1 } : undefined} transition={{ duration: .75, delay, ease: [.22, 1, .36, 1] }}>{children}</motion.section>
+  return <motion.section id={id} className={className} initial={animated ? { opacity: 0, y: distance, scale: .95 } : false} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, margin: '0px 0px -35px 0px' }} animate={!animated ? { opacity: 1, y: 0, scale: 1 } : undefined} transition={{ duration: .75, delay, ease: [.22, 1, .36, 1] }}>{children}</motion.section>
 }
 
 export function CountUp({ value }: { value: number }) {
@@ -67,11 +63,12 @@ export function DetailDialog({ detail, onClose }: { detail: Detail | null; onClo
   </dialog>
 }
 
-export function Parallax({ children, className = '', offset = 60 }: { children: ReactNode; className?: string; offset?: number }) {
+export function Parallax({ children, className = '', offset = 60, range }: { children: ReactNode; className?: string; offset?: number; range?: [number, number] }) {
   const ref = useRef<HTMLDivElement>(null)
   const y = useMotionValue(0)
   const smooth = useSpring(y, { stiffness: 65, damping: 24 })
   const { animated } = useExperience()
+  const start = range?.[0], end = range?.[1]
   useEffect(() => {
     if (!animated) { y.set(0); return }
     let frame = 0
@@ -79,19 +76,23 @@ export function Parallax({ children, className = '', offset = 60 }: { children: 
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
         const box = ref.current?.getBoundingClientRect()
-        if (box && box.top < window.innerHeight && box.bottom > 0) y.set(((box.top + box.height / 2) / window.innerHeight - .5) * offset)
+        if (!box) return
+        const top = box.top - smooth.get()
+        if (start !== undefined && end !== undefined) {
+          const progress = Math.max(0, Math.min(1, (window.innerHeight - top) / (window.innerHeight + box.height)))
+          y.set(start + (end - start) * progress)
+        } else if (top < window.innerHeight && top + box.height > 0) y.set(((top + box.height / 2) / window.innerHeight - .5) * offset)
       })
     }
     update()
     window.addEventListener('scroll', update, { passive: true })
-    return () => { window.removeEventListener('scroll', update); cancelAnimationFrame(frame) }
-  }, [animated, offset, y])
+    window.addEventListener('resize', update)
+    return () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', update); cancelAnimationFrame(frame) }
+  }, [animated, offset, y, smooth, start, end])
   return <motion.div ref={ref} className={className} style={{ y: animated ? smooth : 0 }}>{children}</motion.div>
 }
 
-export function OrbitIcon({ type, style, initial = 'Y' }: { type: 'react' | 'code' | 'game' | 'avatar'; style?: CSSProperties; initial?: string }) {
-  if (type === 'react') return <span className="orbit-icon react-orb" style={style}><ReactMark /></span>
-  if (type === 'code') return <span className="orbit-icon code-orb" style={style}><Code2 size={29} strokeWidth={1.5} /></span>
-  if (type === 'game') return <span className="orbit-icon game-orb" style={style}><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3 13 32 32 42 51 32Z" fill="#66727d" /><path d="M32 3v39l19-10Z" fill="#293642" /><path d="m13 36 19 25 19-25-19 11Z" fill="#89939a" /><path d="M32 47v14l19-25Z" fill="#34424b" /></svg></span>
-  return <span className="orbit-icon avatar-orb" style={style}><span>{initial}<span className="avatar-spark">✳</span></span></span>
+export function OrbitIcon({ type, style, initial = 'Y', image }: { type: 'edge' | 'chrome' | 'ethereum' | 'avatar'; style?: CSSProperties; initial?: string; image?: string }) {
+  if (type !== 'avatar') return <span className={`orbit-icon ${type}-orb`} style={style}><img src={`./images/orbit/${type === 'edge' ? 'edge.png' : `${type}.svg`}`} alt="" draggable={false} /></span>
+  return <span className="orbit-icon avatar-orb" style={style}>{image ? <img src={image} alt="" draggable={false} /> : <span>{initial}<span className="avatar-spark">✳</span></span>}</span>
 }

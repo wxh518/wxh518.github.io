@@ -1,0 +1,834 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "个人主页内容配置",
+  "description": "主页数据文件的结构和字段说明。description 为中文字段注释；新增字段需要同步类型、校验规则与展示组件。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "isDemo",
+    "profile",
+    "sections",
+    "projects",
+    "skills",
+    "books",
+    "copy",
+    "statistics"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "编辑器使用的 JSON Schema 相对路径，仅用于字段提示和校验，不会返回给前端。"
+    },
+    "schemaVersion": {
+      "const": 1,
+      "description": "数据结构版本，当前为 1；仅内容变化时不修改，发生不兼容的结构变化时才升级。"
+    },
+    "isDemo": {
+      "type": "boolean",
+      "description": "是否展示示例数据提示；替换为真实个人资料后可设为 false。"
+    },
+    "profile": {
+      "type": "object",
+      "description": "个人资料和社交账号。",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "names",
+        "tagline",
+        "roles",
+        "city",
+        "email",
+        "intro",
+        "statement",
+        "contact",
+        "socials"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "主要展示名称，用于导航和个人身份展示。"
+        },
+        "names": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "首屏轮换展示的名字或短语，按数组顺序播放，至少保留一项。"
+        },
+        "tagline": {
+          "type": "string",
+          "description": "首屏的一句话介绍。"
+        },
+        "roles": {
+          "type": "array",
+          "description": "首屏身份标签，点击后跳转到对应主页板块。",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "target"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "身份标签的展示文字。"
+              },
+              "target": {
+                "$ref": "#/definitions/sectionId",
+                "description": "点击身份标签时跳转的板块标识，需要在 sections 中存在且启用。"
+              }
+            }
+          }
+        },
+        "city": {
+          "type": "string",
+          "description": "所在地的展示文字，不要求填写精确地址。"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "const": ""
+            },
+            {
+              "type": "string",
+              "format": "email"
+            }
+          ],
+          "description": "联系邮箱，留空时不生成邮件链接。"
+        },
+        "intro": {
+          "type": "string",
+          "description": "社交板块的个人介绍；英文井号关键词（如 #programming）会被高亮。"
+        },
+        "statement": {
+          "type": "string",
+          "description": "个人观点或补充介绍。"
+        },
+        "contact": {
+          "type": "string",
+          "description": "联系区域的邀请文案。"
+        },
+        "socials": {
+          "type": "array",
+          "description": "社交卡片列表；前三项位于第一条滚动轨道，其余项位于第二条。",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "handle",
+              "metric",
+              "unit",
+              "color",
+              "description",
+              "url"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id",
+                "description": "稳定且唯一的账号标识；github、bilibili、twitter、instagram、music、book 对应现有图标，其他值使用默认图标。"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "平台或账号名称。"
+              },
+              "handle": {
+                "type": "string",
+                "description": "展示用用户名或频道名称，例如 @yourname。"
+              },
+              "metric": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "卡片展示的统计数量，例如关注者数量。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "统计数量的单位，例如 followers、篇文章。"
+              },
+              "color": {
+                "$ref": "#/definitions/color",
+                "description": "社交卡片的十六进制背景色；直接使用该颜色，选择适合白色文字的深色。"
+              },
+              "description": {
+                "type": "string",
+                "description": "账号内容简介及详情弹窗说明。"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "const": ""
+                  },
+                  {
+                    "$ref": "#/definitions/httpUrl"
+                  }
+                ],
+                "description": "账号的完整 HTTP/HTTPS 地址；留空时只展示预览详情。"
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/metric"
+                },
+                "description": "可选，多项统计按数组顺序显示；未配置时使用原有统计或隐藏。"
+              }
+            }
+          }
+        },
+        "avatarImage": {
+          "$ref": "#/definitions/image",
+          "description": "可选，首屏、内容创作区和地图定位的头像；未提供时显示姓名首字。"
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "description": "主页板块清单，数组顺序决定页面顺序；同一个 id 只能出现一次。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "enabled",
+          "inNavigation"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/sectionId",
+            "description": "板块标识，对应前端已注册的展示组件。"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "顶部导航中显示的板块名称。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否显示此板块；关闭后也不会出现在导航中。"
+          },
+          "inNavigation": {
+            "type": "boolean",
+            "description": "启用的板块是否出现在顶部导航中。"
+          }
+        }
+      }
+    },
+    "projects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "work",
+        "games",
+        "essays",
+        "music"
+      ],
+      "description": "按展示用途分组的作品，各组数组顺序就是卡片展示顺序，所有项目 id 必须唯一。",
+      "properties": {
+        "work": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/project"
+          },
+          "description": "开发和开源项目，首项出现在工作介绍区域，其余项出现在开源区域。"
+        },
+        "games": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/project"
+          },
+          "description": "游戏或交互作品。"
+        },
+        "essays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/project"
+          },
+          "description": "文章、视频等内容作品卡片；与博客文章列表相互独立。"
+        },
+        "music": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/project"
+          },
+          "description": "音乐作品：首项为乐队，第二、三项为音乐编程，第四项及以后为合成器作品。"
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "description": "技能卡片，按数组顺序展示。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "tag",
+          "level",
+          "note"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "技能的完整展示名称。"
+          },
+          "tag": {
+            "type": "string",
+            "minLength": 1,
+            "description": "唯一的技能关联标签；与项目 tags 中的文字完全一致时显示关联连线。"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "自评熟练度，范围为 0 到 10，控制技能进度格。"
+          },
+          "note": {
+            "type": "string",
+            "description": "技能说明及详情弹窗文案。"
+          }
+        }
+      }
+    },
+    "books": {
+      "type": "array",
+      "description": "书架内容，按数组顺序展示；分类按钮从 category 自动生成。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "author",
+          "color",
+          "category",
+          "subtitle"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "书名，同一书架内须唯一，用作当前界面的书籍标识。"
+          },
+          "author": {
+            "type": "string",
+            "description": "作者名称。"
+          },
+          "color": {
+            "$ref": "#/definitions/color",
+            "description": "立体书封的十六进制背景色。"
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1,
+            "description": "阅读分类，例如 Favorites、Reading、Want to read，也可以使用中文。"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "占位书封上的副标题或短句。"
+          }
+        }
+      }
+    },
+    "copy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stories",
+        "work",
+        "essays",
+        "music",
+        "reading"
+      ],
+      "description": "各板块的介绍文案；需要换行时在 JSON 字符串中使用转义字符 \n。",
+      "properties": {
+        "stories": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "description"
+          ],
+          "description": "社交故事板块底部文案。",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "故事板块的主要短句。"
+            },
+            "description": {
+              "type": "string",
+              "description": "主要短句下方的补充介绍。"
+            }
+          }
+        },
+        "work": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "introduction",
+            "openSourceTitle",
+            "openSourceLead",
+            "openSourceDescription"
+          ],
+          "description": "工作及开源板块文案。",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "工作板块标题。"
+            },
+            "introduction": {
+              "type": "string",
+              "description": "工作介绍，支持转义换行。"
+            },
+            "openSourceTitle": {
+              "type": "string",
+              "description": "开源区域标题。"
+            },
+            "openSourceLead": {
+              "type": "string",
+              "description": "开源区域引导短句。"
+            },
+            "openSourceDescription": {
+              "type": "string",
+              "description": "开源区域的补充介绍。"
+            }
+          }
+        },
+        "essays": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "name",
+            "introduction",
+            "description",
+            "topics"
+          ],
+          "description": "内容创作板块文案。",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "内容创作板块标题。"
+            },
+            "name": {
+              "type": "string",
+              "description": "创作栏目名称。"
+            },
+            "introduction": {
+              "type": "string",
+              "description": "创作介绍，支持转义换行。"
+            },
+            "description": {
+              "type": "string",
+              "description": "创作方向的补充说明。"
+            },
+            "topics": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "内容筛选标签，需要与 projects.essays 中的 tags 对应。"
+            },
+            "metrics": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/metric"
+              },
+              "description": "可选，多项统计按数组顺序显示；未配置时使用原有统计或隐藏。"
+            }
+          }
+        },
+        "music": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "introduction",
+            "description",
+            "gear"
+          ],
+          "description": "音乐板块介绍。",
+          "properties": {
+            "introduction": {
+              "type": "string",
+              "description": "音乐经历和兴趣介绍。"
+            },
+            "description": {
+              "type": "string",
+              "description": "音乐板块的补充短句。"
+            },
+            "gear": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "设备或乐器清单，按数组顺序展示。"
+            },
+            "decorations": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/definitions/image"
+              },
+              "description": "可选，音乐板块两张背景乐器图片；第一张右上，第二张左下，推荐透明背景。"
+            }
+          }
+        },
+        "reading": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "introduction",
+            "description"
+          ],
+          "description": "阅读板块介绍。",
+          "properties": {
+            "introduction": {
+              "type": "string",
+              "description": "阅读习惯或观点介绍。"
+            },
+            "description": {
+              "type": "string",
+              "description": "书架区域的补充短句。"
+            }
+          }
+        }
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ages",
+        "time",
+        "movies",
+        "music"
+      ],
+      "description": "生活统计图表数据。",
+      "properties": {
+        "ages": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": -1
+          },
+          "description": "时间分配图的年龄横轴，严格递增，与 time.values 对齐；可用 -1 作为出生前的曲线过渡点。"
+        },
+        "time": {
+          "type": "array",
+          "minItems": 1,
+          "description": "各类活动在不同年龄的时间占比；同一年龄下所有活动的占比合计必须为 100。",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "values",
+              "color"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "活动名称，同一图表内须唯一。"
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "description": "依次对应 ages 的百分比数值，长度必须与 ages 一致。"
+              },
+              "color": {
+                "$ref": "#/definitions/color",
+                "description": "该活动在图表和图例中的十六进制颜色。"
+              },
+              "labelPosition": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "description": "可选，图内标签位置；坐标基于 500 × 300 的图表画布，省略时根据面积自动定位。",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 500,
+                    "description": "标签在图表画布中的横坐标。"
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 300,
+                    "description": "标签在图表画布中的纵坐标。"
+                  },
+                  "scale": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 3,
+                    "description": "标签缩放倍数，省略时为 1。"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "movies": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/definitions/chartItem"
+          },
+          "description": "电影类型雷达图，至少三个分类；按最大分类数量缩放，数量合计须大于零。"
+        },
+        "music": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/definitions/chartItem"
+          },
+          "description": "音乐类型雷达图，至少三个分类；按最大分类数量缩放，数量合计须大于零。"
+        },
+        "descriptions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "time",
+            "space",
+            "movies",
+            "music"
+          ],
+          "description": "可选，各统计模块标题下的介绍文字。",
+          "properties": {
+            "time": {
+              "type": "string",
+              "description": "时间分配模块的介绍。"
+            },
+            "space": {
+              "type": "string",
+              "description": "旅行足迹模块的介绍。"
+            },
+            "movies": {
+              "type": "string",
+              "description": "电影类型模块的介绍。"
+            },
+            "music": {
+              "type": "string",
+              "description": "专辑类型模块的介绍。"
+            }
+          }
+        },
+        "space": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mapImage",
+            "mapAlt",
+            "marker"
+          ],
+          "description": "可选，旅行足迹地图与头像定位；位置为展示坐标，不调用浏览器地理定位。",
+          "properties": {
+            "mapImage": {
+              "$ref": "#/definitions/image",
+              "description": "地图图片地址，建议长宽比为 600:586。"
+            },
+            "mapAlt": {
+              "type": "string",
+              "description": "地图图片的无障碍说明，标明示例数据或实际足迹。"
+            },
+            "marker": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y"
+              ],
+              "description": "头像左上角在地图中的百分比坐标。",
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 80,
+                  "description": "横向位置百分比，0 为最左，80 确保宽度 20% 的头像在图内。"
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 80,
+                  "description": "纵向位置百分比，0 为最上，建议根据地图内容调整。"
+                }
+              }
+            },
+            "caption": {
+              "type": "string",
+              "description": "可选，地图左下角的位置文字；省略时使用 profile.city。"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "稳定标识，使用小写英文字母、数字和中间连字符，改名时保持标识不变。"
+    },
+    "sectionId": {
+      "type": "string",
+      "enum": [
+        "influencer",
+        "code",
+        "game",
+        "video",
+        "music",
+        "statistics",
+        "books"
+      ],
+      "description": "现有板块标识：社交、代码、游戏、内容创作、音乐、统计、阅读。"
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+      "description": "三位或六位十六进制 CSS 颜色。"
+    },
+    "httpUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://[^/\\s?#]+",
+      "description": "完整的 HTTP 或 HTTPS 链接。"
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "subtitle",
+        "description",
+        "tags",
+        "art"
+      ],
+      "description": "作品卡片和详情弹窗共用的数据结构。",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id",
+          "description": "项目稳定标识，在所有项目分组中唯一，未来可以作为数据库业务键。"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "项目名称。"
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "项目卡片上的一句话简介。"
+        },
+        "description": {
+          "type": "string",
+          "description": "详情弹窗中的项目说明。"
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "技术或主题标签，用于展示、筛选及技能关联。"
+        },
+        "art": {
+          "type": "string",
+          "enum": [
+            "forest",
+            "cats",
+            "space",
+            "mountain",
+            "tiles",
+            "waves",
+            "shapes",
+            "code",
+            "studio"
+          ],
+          "description": "内置占位插画标识；没有配置 image 时使用。"
+        },
+        "url": {
+          "$ref": "#/definitions/httpUrl",
+          "description": "可选，项目体验或仓库的完整地址；没有链接时省略该字段。"
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^(https://[^\\s]+|\\.?/[^\\s]+)$",
+          "description": "可选，封面图片地址，支持 HTTPS、/images/... 或 ./images/...；本地图片放在 public/images 中，省略时使用 art。"
+        }
+      }
+    },
+    "chartItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "value",
+        "color"
+      ],
+      "description": "雷达图的一个分类。",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "分类名称，同一图表内须唯一。"
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "description": "分类数量或权重，无需合计为 100；图表按所有分类中的最大值归一化。"
+        },
+        "color": {
+          "$ref": "#/definitions/color",
+          "description": "该分类数据点的十六进制颜色；首个分类的颜色同时用于整体轮廓填充。"
+        }
+      }
+    },
+    "image": {
+      "type": "string",
+      "pattern": "^(https://[^\\s]+|\\.?/[^\\s]+)$",
+      "description": "图片地址，支持 HTTPS、/images/... 或 ./images/...；本地图片放在 public/images 中。"
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "unit"
+      ],
+      "description": "一项展示统计，允许后续由接口或数据库返回。",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "统计数量，使用非负整数。"
+        },
+        "unit": {
+          "type": "string",
+          "description": "统计单位，例如 followers、posts。"
+        }
+      }
+    }
+  }
+}

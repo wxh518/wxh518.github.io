@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { createApp } from '../worker/index'
-import { homepageContent } from '../src/data/homepage'
-import { posts } from '../src/data/posts'
+import homepageFile from '../content/homepage.json'
+import postsFile from '../content/posts.json'
 import { configContentService } from '../src/services/config-content-service'
 import { createHttpContentService } from '../src/services/http-content-service'
 
+const { $schema: _schema, ...homepageContent } = homepageFile
+const { posts } = postsFile
 const app = createApp()
 const origin = 'https://wxh518.github.io'
 const env = { ALLOWED_ORIGINS: `${origin},http://127.0.0.1:5173` }

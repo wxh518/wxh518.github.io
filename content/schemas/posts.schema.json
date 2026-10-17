@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "博客文章内容配置",
+  "description": "文章元数据和 Markdown 正文。字段与公开接口保持一致，文件级元数据不会进入接口响应。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "posts"],
+  "properties": {
+    "$schema": { "type": "string", "description": "编辑器使用的 JSON Schema 相对路径，仅用于字段提示和校验。" },
+    "schemaVersion": { "const": 1, "description": "文章配置结构版本，当前为 1；与单篇文章的发布日期无关。" },
+    "posts": {
+      "type": "array",
+      "description": "已公开的文章，接口按配置顺序返回；空数组表示暂无文章，不包含草稿或私密内容。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "title", "description", "publishedAt", "tags", "readingMinutes", "body"],
+        "properties": {
+          "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "description": "唯一且稳定的文章地址标识，例如 designing-a-content-layer；发布后修改会影响原有链接，未来可作为数据库唯一键。" },
+          "title": { "type": "string", "minLength": 1, "description": "文章标题。" },
+          "description": { "type": "string", "description": "文章摘要，用于列表展示和关键词搜索。" },
+          "publishedAt": { "type": "string", "format": "date", "description": "发布日期，必须为真实日期，格式为 YYYY-MM-DD，例如 2026-10-13。" },
+          "tags": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "文章标签，支持中文，用于列表筛选和搜索，不允许同一标签重复。" },
+          "readingMinutes": { "type": "integer", "minimum": 1, "description": "预计阅读分钟数，为正整数，当前手动填写。" },
+          "body": { "type": "string", "minLength": 1, "description": "Markdown 正文，段落换行写为 \n\n，支持标题、列表、引用和代码块；仅文章详情接口返回此字段。" }
+        }
+      }
+    }
+  }
+}

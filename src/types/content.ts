@@ -18,9 +18,11 @@ export interface Social {
   color: string
   description: string
   url: string
+  metrics?: { value: number; unit: string }[]
 }
 export interface Profile {
   name: string
+  avatarImage?: string
   names: string[]
   tagline: string
   roles: { label: string; target: SectionId }[]
@@ -46,15 +48,17 @@ export interface HomepageContent {
   copy: {
     stories: { title: string; description: string }
     work: { title: string; introduction: string; openSourceTitle: string; openSourceLead: string; openSourceDescription: string }
-    essays: { title: string; name: string; introduction: string; description: string; topics: string[] }
-    music: { introduction: string; description: string; gear: string[] }
+    essays: { title: string; name: string; introduction: string; description: string; topics: string[]; metrics?: { value: number; unit: string }[] }
+    music: { introduction: string; description: string; gear: string[]; decorations?: string[] }
     reading: { introduction: string; description: string }
   }
   statistics: {
-    time: { label: string; values: number[]; color: string }[]
+    time: { label: string; values: number[]; color: string; labelPosition?: { x: number; y: number; scale?: number } }[]
     ages: number[]
     movies: { label: string; value: number; color: string }[]
     music: { label: string; value: number; color: string }[]
+    descriptions?: { time: string; space: string; movies: string; music: string }
+    space?: { mapImage: string; mapAlt: string; marker: { x: number; y: number }; caption?: string }
   }
 }
 export interface PostSummary {

@@ -1,0 +1,19 @@
+{
+  "description": "公开演示素材的网页衍生文件；透明度保留，按展示尺寸缩放并转为 WebP。原始来源见 sources.json，本机原图备份在 .deployment-repo/reference-originals。",
+  "files": {
+    "avatar.png": "avatar.webp",
+    "band.jpg": "band.webp",
+    "company-game-1.jpg": "company-game-1.webp",
+    "company-game-2.png": "company-game-2.webp",
+    "essay-1.png": "essay-1.webp",
+    "essay-2.png": "essay-2.webp",
+    "essay-3.jpeg": "essay-3.webp",
+    "essay-4.jpeg": "essay-4.webp",
+    "footprint.jpg": "footprint.webp",
+    "game-jam-1.jpeg": "game-jam-1.webp",
+    "game-jam-2.png": "game-jam-2.webp",
+    "game-jam-3.jpg": "game-jam-3.webp",
+    "microfreak.png": "microfreak.webp",
+    "op1.png": "op1.webp"
+  }
+}
