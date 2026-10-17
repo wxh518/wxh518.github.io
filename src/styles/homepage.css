@@ -201,6 +201,10 @@ h2 { letter-spacing: 0; font-weight: 600; }
 .footer-top > .text-link { font-size:14px; }
 .footer-socials { display:flex; height:48px; gap:16px; align-items:center; justify-content:center; color:#334155; }
 .footer-bottom { margin-top:8px; justify-content:center; flex-wrap:wrap; gap:8px 24px; }
+.footer-credit { margin:16px 0 0; color:#64748b; font:400 12px/1.8 sans-serif; overflow-wrap:anywhere; }
+.footer-credit a { color:inherit; text-decoration:underline; text-underline-offset:3px; }
+.footer-credit a:hover { color:var(--orange); }
+.footer-credit a:focus-visible { outline:2px solid var(--orange); outline-offset:4px; border-radius:2px; }
 
 @media(min-width:1024px) { :root { --gutter:64px; } }
 @media(min-width:1280px) { :root { --gutter:128px; } }
