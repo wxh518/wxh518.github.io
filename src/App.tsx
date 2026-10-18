@@ -17,7 +17,7 @@ import { scrollToSection } from './lib/navigation'
 const loadHomepage = (signal: AbortSignal) => contentService.getHomepage(signal)
 const BlogList = lazy(() => import('./pages/Blog').then(module => ({ default: module.BlogList })))
 const BlogPost = lazy(() => import('./pages/Blog').then(module => ({ default: module.BlogPost })))
-const Admin = lazy(() => import('./pages/Admin'))
+const Admin = lazy(() => import.meta.env.VITE_CONTENT_SOURCE === 'http' ? import('./pages/Admin') : import('./pages/StaticAdmin'))
 const AdminPreview = lazy(() => import('./pages/AdminPreview'))
 const sectionComponents = { influencer: Stories, code: CodeSection, game: GamesSection, video: EssaysSection, music: MusicSection, statistics: Statistics, books: BooksSection }
 

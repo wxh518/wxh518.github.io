@@ -5,14 +5,14 @@ import { Home } from '../App'
 import { DetailDialog, ExperienceContext } from '../components/ui'
 import type { Detail } from '../components/ui'
 import type { ContentDocument } from '../types/admin'
-import { validateContent } from '../lib/content-validation'
+import { validateDraftHomepage } from '../lib/content-validation'
 import './Admin.css'
 
 const previewKey = 'orbit-editor-preview-v1'
 function validDocument(value: unknown): value is ContentDocument {
   if (!value || typeof value !== 'object' || !('homepage' in value) || !('posts' in value)) return false
   const input = value as ContentDocument
-  return validateContent(input.homepage, { schemaVersion: 1, posts: input.posts }).length === 0
+  return Array.isArray(input.posts) && validateDraftHomepage(input.homepage).length === 0
 }
 export default function AdminPreview() {
   const [data, setData] = useState<ContentDocument | null>(() => {

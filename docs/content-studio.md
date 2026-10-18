@@ -1,8 +1,10 @@
 # 可视化内容工作台
 
+本文描述保留的 Cloudflare HTTP 管理模式。当前默认 `#/admin` 已改为直接发布 GitHub 的静态博客工作台，请按[新工作台使用指南](static-studio.md)操作；下方入口、云端密码和 D1 保存流程仅在选择 HTTP 数据源后适用。
+
 入口：[wxh518.github.io/#/admin](https://wxh518.github.io/#/admin)。当前为单站点、单管理员模式。
 
-**当前公开站点使用本地 JSON 模式**：主页和博客不依赖 Worker 接口。工作台依然连接 Cloudflare，保存和发布只更新云端快照；需要将准备公开的内容同步到 `content/homepage.json`、`content/posts.json`，将云端图片转存到 `public/images/`，再推送仓库重新部署，访客才能看到更新。云端已有草稿和发布历史继续保留。以下“一键发布、60 秒缓存”的描述适用于恢复 HTTP 数据源后的模式。
+**当前默认模式的区别**：公开站点读取本地 JSON，新博客工作台直接提交 GitHub 并触发静态部署。原 Cloudflare 管理数据、草稿和发布历史继续保留；以下“一键发布到 D1、60 秒接口缓存”的描述适用于恢复 HTTP 数据源后的模式。
 
 ## 日常使用
 

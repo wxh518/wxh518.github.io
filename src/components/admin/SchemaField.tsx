@@ -8,6 +8,8 @@ export interface Schema {
   minItems?: number; minimum?: number; maximum?: number; minLength?: number; format?: string; pattern?: string
 }
 export const UploadContext = createContext<(delta: number) => void>(() => {})
+export const ImageUploadContext = createContext<((file: File) => Promise<string>) | null>(null)
+export const ImagePreviewContext = createContext<(src: string) => string>(src => src)
 const labels: Record<string, string> = {
   isDemo: '显示示例数据提示', profile: '个人资料', name: '名称', names: '首屏轮换名称', tagline: '一句话介绍', roles: '身份标签', label: '显示名称', target: '跳转模块', city: '所在地', email: '公开邮箱', intro: '个人介绍', statement: '补充介绍', contact: '联系邀请', socials: '社交账号', id: '唯一标识', handle: '账号名称', metric: '统计数量', metrics: '展示统计', value: '数值', unit: '单位', color: '颜色', description: '详细说明', url: '链接', sections: '模块设置', enabled: '显示此模块', inNavigation: '显示在导航中', projects: '项目', work: '开发项目', games: '游戏作品', essays: '视频 / 文章作品', music: '音乐', title: '标题', subtitle: '简短介绍', tags: '标签', art: '备用插画', image: '封面图片', avatarImage: '头像', skills: '技能', tag: '关联标签', level: '熟练度（0～10）', note: '技能说明', books: '书单', author: '作者', category: '分类', copy: '模块文案', stories: '社交区域', introduction: '开场介绍', openSourceTitle: '开源区域标题', openSourceLead: '开源区域引言', openSourceDescription: '开源区域介绍', topics: '话题', gear: '设备列表', decorations: '装饰图片', reading: '阅读区域', statistics: '统计图表', ages: '年龄节点', time: '时间分配', values: '各年龄节点占比', labelPosition: '图中文字位置', x: '横向位置', y: '纵向位置', scale: '文字缩放', movies: '电影偏好', descriptions: '图表介绍', space: '足迹地图', mapImage: '地图图片', mapAlt: '地图说明', marker: '头像标记位置', caption: '地图角标', posts: '博客文章', slug: '文章地址', publishedAt: '发布日期', readingMinutes: '阅读分钟数', body: 'Markdown 正文', schemaVersion: '数据版本',
 }
@@ -44,6 +46,8 @@ export function SchemaField({ schema: raw, root, value, onChange, name, path, to
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const reportUpload = useContext(UploadContext)
+  const customUpload = useContext(ImageUploadContext)
+  const previewImage = useContext(ImagePreviewContext)
   const latestChange = useRef(onChange)
   latestChange.current = onChange
   const schema = resolveSchema(raw, root)
@@ -86,11 +90,11 @@ export function SchemaField({ schema: raw, root, value, onChange, name, path, to
     : ['number', 'integer'].includes(schema.type || '') ? <input id={id} type="number" min={schema.minimum} max={schema.maximum} step={schema.type === 'integer' ? 1 : 'any'} value={Number.isFinite(value) ? Number(value) : ''} onChange={event => onChange(event.target.value === '' ? 0 : Number(event.target.value))} />
     : ['body', 'description', 'intro', 'statement', 'contact', 'introduction', 'openSourceDescription'].includes(name) ? <textarea id={id} className={name === 'body' ? 'admin-markdown-input' : ''} rows={name === 'body' ? 18 : 3} value={String(value ?? '')} onChange={event => onChange(event.target.value)} />
     : <div className="admin-input-row">{name === 'color' && <input type="color" aria-label="选择颜色" value={/^#[a-f\d]{6}$/i.test(String(value)) ? String(value) : '#f59247'} onChange={event => onChange(event.target.value)} />}<input id={id} type={schema.format === 'date' ? 'date' : name === 'email' ? 'email' : 'text'} aria-describedby={`${id}-hint`} value={String(value ?? '')} placeholder={!required ? '可留空' : undefined} onChange={event => onChange(!required && !event.target.value ? undefined : event.target.value)} /></div>}
-    {image && <div className="admin-image-tools">{Boolean(value) && <img src={String(value)} alt={`${title}预览`} />}<label className="admin-upload-button"><ImagePlus size={16} />{uploading ? '压缩并上传中…' : '选择图片上传'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploading} onChange={async event => {
+    {image && <div className="admin-image-tools">{Boolean(value) && <img src={previewImage(String(value))} alt={`${title}预览`} />}<label className="admin-upload-button"><ImagePlus size={16} />{uploading ? '压缩并上传中…' : '选择图片上传'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploading} onChange={async event => {
       const file = event.target.files?.[0]; if (!file) return
       setUploading(true); setUploadError(''); reportUpload(1)
       const input = event.target
-      try { latestChange.current(await uploadImage(file, token)) } catch (error) { setUploadError((error as Error).message) } finally { setUploading(false); input.value = ''; reportUpload(-1) }
+      try { latestChange.current(await (customUpload ? customUpload(file) : uploadImage(file, token))) } catch (error) { setUploadError((error as Error).message) } finally { setUploading(false); input.value = ''; reportUpload(-1) }
     }} /></label><small>自动压缩为 WebP，最长边 1600 像素。</small>{uploadError && <p className="admin-error-text" role="alert">{uploadError}</p>}</div>}
   </div>
 }

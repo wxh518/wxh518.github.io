@@ -2,6 +2,14 @@ import type { ErrorObject } from 'ajv'
 import { homepage as validateHomepage, posts as validatePosts } from '../generated/validators.js'
 import type { HomepageContent, Post } from '../types/content'
 
+/** 草稿预览允许工作台暂存的栅格图片，公开配置仍必须使用正式图片路径。 */
+export function validateDraftHomepage(homepage: unknown): string[] {
+  try {
+    const normalized = JSON.parse(JSON.stringify(homepage).replace(/data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}/g, './images/draft-preview.webp'))
+    return validateContent(normalized, { schemaVersion: 1, posts: [] })
+  } catch { return ['主页草稿格式不完整，无法预览。'] }
+}
+
 function formatErrors(file: string, errors: ErrorObject[] | null | undefined) {
   return (errors ?? []).map(error => {
     const field = error.keyword === 'required' ? error.params.missingProperty

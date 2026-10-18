@@ -6,7 +6,7 @@
 
 当前主页和博客默认读取 `content/homepage.json`、`content/posts.json`，随 GitHub Pages 一起发布，不请求 Worker 内容接口。修改配置和站内图片后，推送仓库重新部署即可更新。
 
-内容管理入口：[可视化工作台](https://wxh518.github.io/#/admin)。支持中文表单、图片上传、Markdown 文章、草稿预览、JSON 备份和发布历史；云端内容仍保存在 Cloudflare D1。当前本地模式下，工作台发布只更新云端，需要另行同步仓库配置和图片并重新部署。初始登录信息只在本机 `.deployment-repo/admin-access.txt`，首次登录后可自行改密。详见 [工作台使用与架构](docs/content-studio.md)。
+内容管理入口：[博客工作台](https://wxh518.github.io/#/admin)。支持文章写作、Markdown 实时预览、图片选择和粘贴、自动保存草稿、主页配置、备份与按钮发布。首次连接本站仓库的 GitHub 细粒度令牌后，点击「发布网站」即可把公开文章和图片一并提交到 GitHub，自动更新静态网站，无需手改 JSON 或连接 Cloudflare。详见 [静态工作台使用指南](docs/static-studio.md)。草稿仅保存在当前浏览器，不会自动同步设备。
 
 后端地址：[内容 API](https://wxh518-homepage-api.orbit-homepage.workers.dev/)，[健康检查](https://wxh518-homepage-api.orbit-homepage.workers.dev/api/health)。
 
