@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
+import { MarkdownContent } from '../components/MarkdownContent'
 import { ArrowLeft, ArrowUpRight, Search } from 'lucide-react'
 import { useContent } from '../hooks/useContent'
 import { contentService } from '../services/content-service'
@@ -24,5 +24,5 @@ export function BlogPost() {
   const { data, loading, error, retry } = useContent(loadPost)
   if (loading || error) return <ContentState loading={loading} error={error} retry={retry} />
   if (!data) return <NotFound message="这篇文章还没有来到这里。" />
-  return <main className="article-page"><Link className="text-link back-link" to="/blog"><ArrowLeft size={16} /> All notes</Link><header className="article-heading"><div className="post-meta"><time dateTime={data.publishedAt}>{data.publishedAt}</time><span>{data.readingMinutes} MIN READ</span></div><h1>{data.title}</h1><p>{data.description}</p><div className="tags">{data.tags.map(tag => <Link to="/blog" key={tag}>{tag}</Link>)}</div></header><article className="markdown-body"><ReactMarkdown>{data.body}</ReactMarkdown></article><div className="article-end"><span>✳</span><p>Thanks for spending a little time here.</p><Link className="text-link" to="/blog">继续阅读 <ArrowUpRight size={16} /></Link></div></main>
+  return <main className="article-page"><Link className="text-link back-link" to="/blog"><ArrowLeft size={16} /> All notes</Link><header className="article-heading"><div className="post-meta"><time dateTime={data.publishedAt}>{data.publishedAt}</time><span>{data.readingMinutes} MIN READ</span></div><h1>{data.title}</h1><p>{data.description}</p><div className="tags">{data.tags.map(tag => <Link to="/blog" key={tag}>{tag}</Link>)}</div></header><article className="markdown-body"><MarkdownContent>{data.body}</MarkdownContent></article><div className="article-end"><span>✳</span><p>Thanks for spending a little time here.</p><Link className="text-link" to="/blog">继续阅读 <ArrowUpRight size={16} /></Link></div></main>
 }

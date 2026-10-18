@@ -1,0 +1,15 @@
+.markdown-body h1 { font-size:2em; line-height:1.4; margin:1.2em 0 .6em; }
+.markdown-body h4,.markdown-body h5,.markdown-body h6 { font-size:1em; font-weight:600; margin:1.5em 0 .7em; }
+.markdown-body h5 { font-size:.95em; }
+.markdown-body h6 { font-size:.9em; }
+.markdown-body table { display:block; max-width:100%; overflow-x:auto; border-collapse:collapse; margin:1.5em 0; font-size:.95em; }
+.markdown-body th,.markdown-body td { border:1px solid #dce3e8; padding:.5em .8em; min-width:5em; }
+.markdown-body th { background:#f1f4f6; font-weight:600; }
+.markdown-body tr:nth-child(even) { background:#fafbfc; }
+.markdown-body .contains-task-list { list-style:none; }
+.markdown-body .task-list-item>input[type=checkbox] { display:inline-block; width:1em; height:1em; padding:0; margin:0 .5em 0 -1.4em; vertical-align:middle; accent-color:#b77545; }
+.markdown-body hr { border:0; border-top:1px solid #dce3e8; margin:2em 0; }
+.markdown-body .footnotes { font-size:.85em; border-top:1px solid #dce3e8; margin-top:2em; }
+.markdown-body .footnotes h2 { font-size:1.2em; }
+.markdown-body pre code { font:inherit; }
+.markdown-body img { max-width:100%; height:auto; }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import ReactMarkdown, { defaultUrlTransform } from 'react-markdown'
-import { ArrowUpRight, BookOpen, Check, Code2, Download, Eye, FileText, Globe, ImagePlus, LayoutGrid, Link2, Plus, Save, Settings2, ShieldCheck, Trash2, Upload, UserRound } from 'lucide-react'
+import { MarkdownEditor } from '../components/admin/MarkdownEditor'
+import { ArrowUpRight, BookOpen, Check, Code2, Download, Eye, FileText, Globe, LayoutGrid, Link2, Plus, Save, Settings2, ShieldCheck, Trash2, Upload, UserRound } from 'lucide-react'
 import homepageSchema from '../../content/schemas/homepage.schema.json'
 import { configContentSource } from '../services/config-content-service'
 import { ImagePreviewContext, ImageUploadContext, SchemaField, UploadContext, type Schema } from '../components/admin/SchemaField'
@@ -31,7 +31,6 @@ const tabs = [
 type Tab = typeof tabs[number]['id']
 const seed = (): ContentDocument => structuredClone(configContentSource)
 const localDate = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Shanghai' })
-const previewUrl = (url: string) => /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/.test(url) ? url : defaultUrlTransform(url)
 function backup(document: ContentDocument, baseline: string, images: Record<string, string>) {
   const url = URL.createObjectURL(new Blob([JSON.stringify({ format: 'orbit-static-studio', version: 1, document, baseline, images }, null, 2)], { type: 'application/json' }))
   const anchor = window.document.createElement('a'); anchor.href = url; anchor.download = `blog-backup-${localDate()}.json`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000)
@@ -57,9 +56,6 @@ export default function StaticAdmin() {
   const [reloadConfirm, setReloadConfirm] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [formKey, setFormKey] = useState(0)
-  const [editorMode, setEditorMode] = useState<'split' | 'write' | 'preview'>('split')
-  const bodyInput = useRef<HTMLTextAreaElement>(null)
-  const imageInput = useRef<HTMLInputElement>(null)
   const importInput = useRef<HTMLInputElement>(null)
   const previewWindow = useRef<Window | null>(null)
   const saving = useRef(false)
@@ -132,18 +128,6 @@ export default function StaticAdmin() {
 
   function update(next: ContentDocument | ((previous: ContentDocument) => ContentDocument)) { editSequence.current++; setDocument(next); setError(''); setMessage('') }
   function updatePost(change: Partial<Post>) { update(previous => ({ ...previous, posts: previous.posts.map((item, index) => index === postIndex ? { ...item, ...change } : item) })) }
-  function insert(text: string) {
-    if (!post) return
-    const input = bodyInput.current
-    const start = input?.selectionStart ?? post.body.length
-    const end = input?.selectionEnd ?? start
-    updatePost({ body: post.body.slice(0, start) + text + post.body.slice(end) })
-    requestAnimationFrame(() => { input?.focus(); input?.setSelectionRange(start + text.length, start + text.length) })
-  }
-  async function insertImage(file: File) {
-    setUploads(count => count + 1); setError('')
-    try { insert(`\n\n![图片说明](${await uploadLocalImage(file)})\n\n`) } catch (cause) { reportError(cause) } finally { setUploads(count => count - 1) }
-  }
   async function save() {
     try {
       await writeStudioDraft({ document, baseline, savedAt: new Date().toISOString(), commit, images })
@@ -207,8 +191,7 @@ export default function StaticAdmin() {
         update(previous => ({ ...previous, posts: [next, ...previous.posts] })); setSelected(0); setDeleteConfirm(false)
       }}><Plus size={15} />写文章</button></div>{document.posts.map((item, index) => <button key={`${index}-${item.slug}`} className={`studio-post-choice ${postIndex === index ? 'selected' : ''}`} onClick={() => { setSelected(index); setDeleteConfirm(false) }}><strong>{item.title || '未命名文章'}</strong><span>{item.status === 'draft' ? '本机草稿' : '公开文章'} · {item.publishedAt}</span></button>)}{!document.posts.length && <p>点击“写文章”，开始第一篇记录。</p>}</section>
       {post && <section className="studio-composer admin-card"><div className="studio-post-meta"><label>文章标题<input aria-label="文章标题" value={post.title} onChange={event => updatePost({ title: event.target.value })} /></label><label>摘要<textarea aria-label="文章摘要" rows={2} value={post.description} onChange={event => updatePost({ description: event.target.value })} /></label><div className="studio-meta-grid"><label>文章地址<input aria-label="文章地址" value={post.slug} onChange={event => updatePost({ slug: event.target.value })} /><small>英文、数字和连字符；发布后保持稳定。</small></label><label>发布日期<input aria-label="发布日期" type="date" value={post.publishedAt} onChange={event => updatePost({ publishedAt: event.target.value })} /></label><label>阅读分钟数<input aria-label="阅读分钟数" type="number" min={1} value={post.readingMinutes} onChange={event => updatePost({ readingMinutes: Math.max(1, Number(event.target.value)) })} /></label><label>文章状态<select aria-label="文章状态" value={post.status || 'published'} onChange={event => updatePost({ status: event.target.value as Post['status'] })}><option value="draft">草稿 · 仅此浏览器</option><option value="published">公开 · 随网站发布</option></select></label></div><label>标签（每行一个）<textarea aria-label="文章标签" rows={2} value={post.tags.join('\n')} onChange={event => updatePost({ tags: event.target.value ? event.target.value.split('\n') : [] })} onBlur={() => updatePost({ tags: [...new Set(post.tags.map(tag => tag.trim()).filter(Boolean))] })} /></label></div>
-      <div className="studio-editor-toolbar"><div><button onClick={() => insert('**加粗文字**')}>加粗</button><button onClick={() => insert('\n\n## 小标题\n\n')}>标题</button><button onClick={() => insert('\n\n```text\n在这里输入代码\n```\n\n')}>代码块</button><button onClick={() => imageInput.current?.click()}><ImagePlus size={15} />插入图片</button><input ref={imageInput} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={event => { const file = event.target.files?.[0]; if (file) void insertImage(file); event.target.value = '' }} /></div><div className="studio-editor-modes">{(['write', 'split', 'preview'] as const).map(mode => <button key={mode} aria-pressed={editorMode === mode} onClick={() => setEditorMode(mode)}>{mode === 'write' ? '写作' : mode === 'split' ? '对照' : '预览'}</button>)}</div></div>
-      <div className={`studio-editor studio-editor-${editorMode}`}><textarea ref={bodyInput} aria-label="Markdown 正文" className="admin-markdown-input" placeholder="开始写作，支持 Markdown。可以直接粘贴剪贴板图片。" value={post.body} onChange={event => updatePost({ body: event.target.value })} onPaste={event => { const file = [...event.clipboardData.files].find(item => item.type.startsWith('image/')); if (file) { event.preventDefault(); void insertImage(file) } }} /><article className="markdown-body studio-article-preview"><ReactMarkdown urlTransform={url => previewUrl(images[url] || url)}>{post.body || '正文预览会显示在这里。'}</ReactMarkdown></article></div><p className="admin-tip">图片按钮会自动压缩并插入正文；也支持截图后直接粘贴。草稿含图片保存在当前浏览器，发布时自动生成站内图片链接。</p><div className="studio-post-end"><span>{post.body.length.toLocaleString()} 字符</span><button className="admin-danger" onClick={() => setDeleteConfirm(true)}><Trash2 size={14} />删除文章</button></div>{deleteConfirm && <div className="admin-confirm"><p>删除《{post.title}》？删除后需点击发布网站才会从线上移除。操作前可在“发布与备份”导出草稿。</p><button onClick={() => { update(previous => ({ ...previous, posts: previous.posts.filter((_, index) => index !== postIndex) })); setSelected(0); setDeleteConfirm(false) }}>确认删除</button><button onClick={() => setDeleteConfirm(false)}>取消</button></div>}</section>}</div>}
+      <MarkdownEditor key={`${formKey}:${postIndex}`} value={post.body} images={images} onChange={body => updatePost({ body })} onImageUpload={uploadLocalImage} onUploadCount={delta => setUploads(count => count + delta)} onError={reportError} /><div className="studio-post-end"><span>{post.body.length.toLocaleString()} 字符</span><button className="admin-danger" onClick={() => setDeleteConfirm(true)}><Trash2 size={14} />删除文章</button></div>{deleteConfirm && <div className="admin-confirm"><p>删除《{post.title}》？删除后需点击发布网站才会从线上移除。操作前可在“发布与备份”导出草稿。</p><button onClick={() => { update(previous => ({ ...previous, posts: previous.posts.filter((_, index) => index !== postIndex) })); setSelected(0); setDeleteConfirm(false) }}>确认删除</button><button onClick={() => setDeleteConfirm(false)}>取消</button></div>}</section>}</div>}
       {tab !== 'posts' && tab !== 'settings' && <div className="admin-card" key={formKey}>{tab === 'profile' && <SchemaField schema={schema.properties!.isDemo} root={schema} value={document.homepage.isDemo} name="isDemo" path="isDemo" token="" required onChange={value => update(previous => ({ ...previous, homepage: { ...previous.homepage, isDemo: Boolean(value) } }))} />}<SchemaField schema={schema.properties![tab]} root={schema} value={document.homepage[tab as keyof HomepageContent]} name={tab} path={tab} token="" required onChange={value => update(previous => {
         const homepage = { ...previous.homepage, [tab]: value } as HomepageContent
         if (tab === 'sections') { const enabled = new Set(homepage.sections.filter(section => section.enabled).map(section => section.id)); homepage.profile = { ...homepage.profile, roles: homepage.profile.roles.filter(role => enabled.has(role.target)) } }

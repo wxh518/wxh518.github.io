@@ -1,0 +1,29 @@
+.markdown-workbench { margin-top:22px; min-width:0; }
+.markdown-preferences { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding:13px 0; }
+.markdown-font-controls,.markdown-modes { display:flex; flex-wrap:wrap; gap:8px; }
+.markdown-font-controls label { display:flex; align-items:center; gap:8px; font-size:13px; color:#627281; }
+.admin-root .markdown-workbench select { width:auto; font-size:13px; padding:7px 9px; min-height:34px; }
+.admin-root .markdown-workbench button { font-size:12px; padding:7px 10px; min-height:34px; }
+.markdown-modes button[aria-pressed=true] { background:#edf1f4; border-color:#bdc8d1; }
+.markdown-tools { display:flex; flex-wrap:wrap; gap:8px; padding:12px; border:1px solid #e0e6eb; background:#f8fafb; border-radius:10px; margin-bottom:14px; }
+.markdown-tool-group { display:flex; flex-wrap:wrap; align-items:center; gap:5px; }
+.markdown-tool-label { font-size:11px; color:#81909b; padding:0 5px; }
+.markdown-editor { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:stretch; }
+.admin-root .markdown-editor>textarea { min-height:600px; height:100%; font:var(--editor-font-size)/1.9 Consolas,'Microsoft YaHei',monospace; padding:20px; resize:vertical; tab-size:4; }
+.markdown-editor .markdown-editor-preview-body { margin:0; padding:20px; border:1px solid #e2e8ec; border-radius:8px; font:var(--preview-font-size)/1.9 'Segoe UI','Microsoft YaHei',sans-serif; min-width:0; max-height:900px; overflow:auto; background:#fff; }
+.admin-root .markdown-editor-preview-body p { font-size:inherit; line-height:inherit; color:inherit; margin:1em 0; }
+.admin-root .markdown-editor-preview-body h1 { font-size:2em; line-height:1.4; margin:1.2em 0 .6em; }
+.admin-root .markdown-editor-preview-body h2 { font-size:1.55em; line-height:1.5; margin:1.5em 0 .7em; }
+.admin-root .markdown-editor-preview-body h3 { font-size:1.3em; line-height:1.5; margin:1.4em 0 .6em; }
+.admin-root .markdown-editor-preview-body h4 { font-size:1.1em; }
+.admin-root .markdown-editor-preview-body h5 { font-size:1em; }
+.admin-root .markdown-editor-preview-body h6 { font-size:.9em; }
+.admin-root .markdown-editor-preview-body blockquote { font-size:inherit; }
+.admin-root .markdown-editor-preview-body pre { font-size:.85em; padding:1.2em; max-width:100%; }
+.admin-root .markdown-editor-preview-body .footnotes h2 { font-size:1.2em; }
+.markdown-editor-write,.markdown-editor-preview { grid-template-columns:minmax(0,1fr); }
+.markdown-editor-write article,.markdown-editor-preview>textarea { display:none; }
+.markdown-help { font-size:12px; color:#7a8995; line-height:1.9; }
+.markdown-help summary { cursor:pointer; padding:5px 0; }
+.admin-root .markdown-help p { font-size:12px; }
+@media(max-width:760px) { .markdown-editor { grid-template-columns:minmax(0,1fr); }.admin-root .markdown-editor>textarea { min-height:420px; }.markdown-editor-split article { max-height:550px; }.markdown-tools { padding:8px; }.markdown-tool-group { gap:4px; }.admin-root .markdown-workbench button { padding:7px 8px; } }
