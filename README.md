@@ -4,7 +4,9 @@
 
 站点地址：[wxh518.github.io](https://wxh518.github.io/)。博客入口：[文章列表](https://wxh518.github.io/#/blog)。
 
-内容管理入口：[可视化工作台](https://wxh518.github.io/#/admin)。支持中文表单、图片上传、Markdown 文章、草稿预览、一键发布、JSON 备份和发布历史；线上内容保存在 Cloudflare D1，日常更新无需提交代码。初始登录信息只在本机 `.deployment-repo/admin-access.txt`，首次登录后可自行改密。详见 [工作台使用与架构](docs/content-studio.md)。
+当前主页和博客默认读取 `content/homepage.json`、`content/posts.json`，随 GitHub Pages 一起发布，不请求 Worker 内容接口。修改配置和站内图片后，推送仓库重新部署即可更新。
+
+内容管理入口：[可视化工作台](https://wxh518.github.io/#/admin)。支持中文表单、图片上传、Markdown 文章、草稿预览、JSON 备份和发布历史；云端内容仍保存在 Cloudflare D1。当前本地模式下，工作台发布只更新云端，需要另行同步仓库配置和图片并重新部署。初始登录信息只在本机 `.deployment-repo/admin-access.txt`，首次登录后可自行改密。详见 [工作台使用与架构](docs/content-studio.md)。
 
 后端地址：[内容 API](https://wxh518-homepage-api.orbit-homepage.workers.dev/)，[健康检查](https://wxh518-homepage-api.orbit-homepage.workers.dev/api/health)。
 
@@ -12,7 +14,7 @@
 
 仓库 `wxh518/wxh518.github.io` 使用 `.github/workflows/deploy-pages.yml` 自动发布前端。向 `master` 推送后，GitHub Actions 使用 Node.js 22 安装锁定依赖，执行接口测试、Worker 打包检查、前后端 TypeScript 检查和前端生产构建，再把 `dist/` 发布到 GitHub Pages。也可以在 Actions 中手动运行该工作流。
 
-后端通过本机 Wrangler 发布到 Cloudflare。首次使用运行 `npx wrangler login` 并在浏览器授权；发布目标由 `wrangler.jsonc` 指定。修改接口代码后，先发布后端，再推送源码；日常内容更新直接在工作台发布：
+后端通过本机 Wrangler 发布到 Cloudflare。首次使用运行 `npx wrangler login` 并在浏览器授权；发布目标由 `wrangler.jsonc` 指定。当前静态站点更新只需要 `npm run build` 并推送源码；下面是包含后端修改时的完整流程：
 
 ```sh
 npm test
@@ -44,7 +46,7 @@ npm run dev:api
 npm run dev
 ```
 
-打开 http://127.0.0.1:5173/ 。前端请求 `/api`，Vite 将请求代理到本地 Worker `http://127.0.0.1:8787`，开发时也会实际经过 HTTP 接口。Wrangler 本地模拟器不需要 Cloudflare 登录。端口固定为 5173 和 8787；如需更改，同时更新 Vite 代理或 CORS 配置。
+打开 http://127.0.0.1:5173/ 。默认使用本地 JSON，单独运行 `npm install` 和 `npm run dev` 即可预览公开主页和博客，无需启动 Worker。若开发管理接口或显式切换 HTTP 模式，再启动上述本地后端；Vite 将 `/api` 代理到 `http://127.0.0.1:8787`。
 
 ```sh
 npm run typecheck
@@ -55,9 +57,9 @@ npm run build
 npm run preview
 ```
 
-前端构建产物在 `dist/`，Worker 打包检查产物在 `worker-dist/`。开发环境使用 Node.js 22.12+。生产构建需要有效的 HTTPS API 地址，缺少配置会直接报错，以免把相对 `/api` 地址发布到 GitHub Pages。
+前端构建产物在 `dist/`，Worker 打包检查产物在 `worker-dist/`。开发环境使用 Node.js 22.12+。仅显式选择 HTTP 模式时，生产构建才要求有效的 HTTPS API 地址。
 
-如果只想离线看界面，可创建不提交的 `.env.development.local`，写入 `VITE_CONTENT_SOURCE=local`，然后重启前端。线上构建使用 HTTP 模式，不会把配置内容作为失败回退静默展示。
+默认和线上 `.env.production` 都选择本地 JSON。后续恢复接口时，将 `VITE_CONTENT_SOURCE` 改为 `http` 并重新构建；HTTP 模式不会静默回退到旧配置。
 
 ## 修改内容
 
@@ -108,7 +110,7 @@ npm run preview
 
 ## 已接入的 HTTP API
 
-默认使用 HTTP 接口，配置内容由 Worker 返回。生产环境地址配置在 `.env.production`，本地默认使用代理路径 `/api`：
+HTTP 适配器作为可选模式保留。需要恢复时，在 `.env.production` 配置下面的环境变量；开发环境可在 `.env.development.local` 选择 `http` 并使用代理路径 `/api`：
 
 ```dotenv
 VITE_CONTENT_SOURCE=http
@@ -128,7 +130,7 @@ VITE_CONTENT_API_URL=https://wxh518-homepage-api.orbit-homepage.workers.dev/api
 
 公开内容接口保持只读，正常内容响应允许浏览器缓存 60 秒，错误和健康检查不缓存。`/api/admin/*` 提供有密码和短期会话保护的独立管理接口，所有管理响应均不缓存。CORS 允许 `https://wxh518.github.io` 及配置的本地开发来源；CORS 是浏览器跨域规则，管理鉴权另行验证。
 
-`VITE_*` 环境变量会进入公开的浏览器代码，不用于存放秘密。线上内容来自 D1 的已发布快照；JSON 仅用于首次初始化、离线模式和无数据库环境。写入入口复用 Schema 与跨字段校验；公开页面维持原有 `ContentService` 和 HTTP 响应结构。密码摘要使用 Worker Secret 或 D1 覆盖记录，均不会进入前端构建。
+`VITE_*` 环境变量会进入公开的浏览器代码，不用于存放秘密。当前静态页面来自本地 JSON；选择 HTTP 模式时才使用 D1 已发布快照。两种来源复用 `ContentService`，后端写入入口复用 Schema 与跨字段校验。密码摘要使用 Worker Secret 或 D1 覆盖记录，均不会进入前端构建。
 
 ## 博客与静态托管
 

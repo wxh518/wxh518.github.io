@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig(({ command, mode }) => {
   const env = { ...loadEnv(mode, process.cwd(), 'VITE_'), ...process.env }
-  if (command === 'build' && env.VITE_CONTENT_SOURCE !== 'local'
+  if (command === 'build' && env.VITE_CONTENT_SOURCE === 'http'
     && !env.VITE_CONTENT_API_URL?.startsWith('https://')) {
     throw new Error('HTTP production builds need VITE_CONTENT_API_URL=https://<worker-domain>/api. Set VITE_CONTENT_SOURCE=local for an offline preview.')
   }

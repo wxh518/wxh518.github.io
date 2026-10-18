@@ -1,6 +1,8 @@
 # 可视化内容工作台
 
-入口：[wxh518.github.io/#/admin](https://wxh518.github.io/#/admin)。当前为单站点、单管理员模式，无需 GitHub Token 或每次重新部署。
+入口：[wxh518.github.io/#/admin](https://wxh518.github.io/#/admin)。当前为单站点、单管理员模式。
+
+**当前公开站点使用本地 JSON 模式**：主页和博客不依赖 Worker 接口。工作台依然连接 Cloudflare，保存和发布只更新云端快照；需要将准备公开的内容同步到 `content/homepage.json`、`content/posts.json`，将云端图片转存到 `public/images/`，再推送仓库重新部署，访客才能看到更新。云端已有草稿和发布历史继续保留。以下“一键发布、60 秒缓存”的描述适用于恢复 HTTP 数据源后的模式。
 
 ## 日常使用
 
@@ -32,11 +34,12 @@
   ├─ 保存草稿 → Hono 管理接口 → D1 draft
   └─ 发布 → 同一套 Schema + 关联校验 → D1 published + 发布历史
 
-公开主页 / 博客 → 原有 ContentService → Hono 只读接口 → D1 published
+公开主页 / 博客（当前） → ContentService → content/*.json（随站点构建）
+公开主页 / 博客（可选 HTTP 模式） → ContentService → Hono 只读接口 → D1 published
 首次初始化 → content/*.json
 ```
 
-JSON 现在是初始化种子、离线展示来源和配置格式参考。数据库初始化以后，修改源码 JSON 再部署 Worker **不会覆盖已保存的 D1 内容**；日常内容修改请使用工作台。初始导入只执行 `INSERT OR IGNORE`，不使用清表或覆盖操作。
+JSON 当前是静态主页的内容来源，同时保留后端初始化种子的作用。修改 JSON 并重新部署 Pages 会更新静态主页；重新部署 Worker **不会覆盖已保存的 D1 内容**。云端内容仍通过工作台维护；首次初始化只执行 `INSERT OR IGNORE`，不使用清表或覆盖操作。
 
 `ContentService` 接口维持不变；后续可以拆分为 profiles/projects/posts 等表。目前整个站点作为一个文档保存，以便原子发布和恢复，避免一半新、一半旧的数据状态。
 

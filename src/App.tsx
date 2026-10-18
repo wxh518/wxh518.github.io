@@ -22,7 +22,6 @@ const AdminPreview = lazy(() => import('./pages/AdminPreview'))
 const sectionComponents = { influencer: Stories, code: CodeSection, game: GamesSection, video: EssaysSection, music: MusicSection, statistics: Statistics, books: BooksSection }
 
 export function Home({ data }: { data: HomepageContent }) {
-  useEffect(() => { document.title = `${data.profile.name} · A little universe` }, [data.profile.name])
   return <main id="main"><p className="mobile-view-note">View on desktop for better experience.</p><Hero profile={data.profile} />{data.sections.filter(section => section.enabled).map(section => {
     const Component = sectionComponents[section.id]
     return Component ? <Component key={section.id} data={data} /> : null
