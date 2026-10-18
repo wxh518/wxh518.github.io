@@ -37,6 +37,8 @@ export interface Skill { name: string; tag: string; level: number; note: string 
 export interface Book { title: string; author: string; color: string; category: string; subtitle: string }
 export type SectionId = 'influencer' | 'code' | 'game' | 'video' | 'music' | 'statistics' | 'books'
 export interface SectionConfig { id: SectionId; label: string; enabled: boolean; inNavigation: boolean }
+export interface MapPlace { name: string; latitude: number; longitude: number }
+export interface MapBounds { west: number; east: number; south: number; north: number }
 export interface HomepageContent {
   schemaVersion: 1
   isDemo: boolean
@@ -58,7 +60,10 @@ export interface HomepageContent {
     movies: { label: string; value: number; color: string }[]
     music: { label: string; value: number; color: string }[]
     descriptions?: { time: string; space: string; movies: string; music: string }
-    space?: { mapImage: string; mapAlt: string; marker: { x: number; y: number }; caption?: string }
+    space?: {
+      mapImage: string; mapAlt: string; marker: { x: number; y: number }; caption?: string
+      bounds?: MapBounds; currentLocation?: MapPlace; visitedPlaces?: MapPlace[]
+    }
   }
 }
 export interface PostSummary {

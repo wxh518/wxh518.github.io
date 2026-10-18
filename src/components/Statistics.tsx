@@ -3,6 +3,7 @@ import type { HomepageContent } from '../types/content'
 import { Reveal } from './ui'
 import { TimeChart } from './statistics/TimeChart'
 import { RadarChart } from './statistics/RadarChart'
+import { FootprintMap } from './statistics/FootprintMap'
 import './statistics/Statistics.css'
 
 export function Statistics({ data }: { data: HomepageContent }) {
@@ -13,7 +14,7 @@ export function Statistics({ data }: { data: HomepageContent }) {
       <div className="statistics-time surface"><h2>Time</h2><p>{descriptions?.time}</p><TimeChart ages={statistics.ages} series={statistics.time} /></div>
       <div className="statistics-side">
         <div className="statistics-space surface"><h2>Space</h2><p>{descriptions?.space}</p>
-          {space ? <div className="footprint-map">
+          {space?.bounds && space.currentLocation ? <FootprintMap space={space} profile={profile} /> : space ? <div className="footprint-map">
             <img className="footprint-image" src={space.mapImage} alt={space.mapAlt} loading="lazy" width="600" height="586" />
             <span className="footprint-marker" style={{ '--marker-x': `${space.marker.x}%`, '--marker-y': `${space.marker.y}%` } as CSSProperties}>
               <span className="footprint-pulse" />

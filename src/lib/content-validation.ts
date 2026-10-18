@@ -64,6 +64,18 @@ export function validateContent(homepageInput: unknown, postsInput: unknown): st
       unique(items.map(item => item.label), `content/homepage.json/statistics/${name}`)
       if (items.reduce((sum, item) => sum + item.value, 0) <= 0) errors.push(`content/homepage.json/statistics/${name}：雷达图数值合计必须大于零`)
     }
+    const space = homepage.statistics.space
+    if (space && (space.bounds || space.currentLocation || space.visitedPlaces)) {
+      if (!space.bounds || !space.currentLocation) errors.push('content/homepage.json/statistics/space：城市足迹需同时配置地图范围和当前位置')
+      if (space.bounds) {
+        const { west, east, south, north } = space.bounds
+        if (west >= east || south >= north) errors.push('content/homepage.json/statistics/space/bounds：最东经度须大于最西经度，最北纬度须大于最南纬度')
+        for (const place of [...(space.currentLocation ? [space.currentLocation] : []), ...(space.visitedPlaces || [])]) {
+          if (place.longitude < west || place.longitude > east || place.latitude < south || place.latitude > north) errors.push(`content/homepage.json/statistics/space：${place.name} 的坐标超出底图范围`)
+        }
+      }
+      unique((space.visitedPlaces || []).map(place => place.name), 'content/homepage.json/statistics/space/visitedPlaces')
+    }
   }
   if (postsValid) unique((postsInput as { posts: Post[] }).posts.map(post => post.slug), 'content/posts.json/posts')
   return errors

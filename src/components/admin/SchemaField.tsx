@@ -11,6 +11,7 @@ export const UploadContext = createContext<(delta: number) => void>(() => {})
 export const ImageUploadContext = createContext<((file: File) => Promise<string>) | null>(null)
 export const ImagePreviewContext = createContext<(src: string) => string>(src => src)
 const labels: Record<string, string> = {
+  bounds: '地图经纬度范围', currentLocation: '当前位置', visitedPlaces: '去过的城市', latitude: '纬度', longitude: '经度', west: '最西经度', east: '最东经度', south: '最南纬度', north: '最北纬度',
   isDemo: '显示示例数据提示', profile: '个人资料', name: '名称', names: '首屏轮换名称', tagline: '一句话介绍', roles: '身份标签', label: '显示名称', target: '跳转模块', city: '所在地', email: '公开邮箱', intro: '个人介绍', statement: '补充介绍', contact: '联系邀请', socials: '社交账号', id: '唯一标识', handle: '账号名称', metric: '统计数量', metrics: '展示统计', value: '数值', unit: '单位', color: '颜色', description: '详细说明', url: '链接', sections: '模块设置', enabled: '显示此模块', inNavigation: '显示在导航中', projects: '项目', work: '开发项目', games: '游戏作品', essays: '视频 / 文章作品', music: '音乐', title: '标题', subtitle: '简短介绍', tags: '标签', art: '备用插画', image: '封面图片', avatarImage: '头像', skills: '技能', tag: '关联标签', level: '熟练度（0～10）', note: '技能说明', books: '书单', author: '作者', category: '分类', copy: '模块文案', stories: '社交区域', introduction: '开场介绍', openSourceTitle: '开源区域标题', openSourceLead: '开源区域引言', openSourceDescription: '开源区域介绍', topics: '话题', gear: '设备列表', decorations: '装饰图片', reading: '阅读区域', statistics: '统计图表', ages: '年龄节点', time: '时间分配', values: '各年龄节点占比', labelPosition: '图中文字位置', x: '横向位置', y: '纵向位置', scale: '文字缩放', movies: '电影偏好', descriptions: '图表介绍', space: '足迹地图', mapImage: '地图图片', mapAlt: '地图说明', marker: '头像标记位置', caption: '地图角标', posts: '博客文章', slug: '文章地址', publishedAt: '发布日期', readingMinutes: '阅读分钟数', body: 'Markdown 正文', schemaVersion: '数据版本',
 }
 const sectionNames: Record<string, string> = { influencer: '社交', code: '代码', game: '游戏', video: '视频', music: '音乐', statistics: '统计', books: '书单', draft: '草稿（不公开）', published: '公开文章' }
@@ -57,7 +58,7 @@ export function SchemaField({ schema: raw, root, value, onChange, name, path, to
   if (schema.type === 'object') {
     if (value === undefined) return <div className="admin-optional"><div><strong>{title}</strong><p>{schema.description}</p></div><button type="button" onClick={() => onChange(defaultValue(schema, root))}><Plus size={15} />添加</button></div>
     const object = (value || {}) as Record<string, unknown>
-    const fields = Object.entries(schema.properties || {})
+    const fields = Object.entries(schema.properties || {}).filter(([key]) => name !== 'space' || !object.currentLocation || !['marker', 'caption'].includes(key))
     if (name === 'profile') {
       const order = ['name', 'avatarImage', 'names', 'tagline', 'city', 'email', 'intro', 'statement', 'contact', 'roles', 'socials']
       fields.sort(([a], [b]) => order.indexOf(a) - order.indexOf(b))

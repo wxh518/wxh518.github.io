@@ -1,0 +1,20 @@
+{
+  "basemap": {
+    "source": "Natural Earth 1:110m land",
+    "url": "https://naturalearth.s3.amazonaws.com/110m_physical/ne_110m_land.zip",
+    "license": "Public domain",
+    "terms": "https://www.naturalearthdata.com/about/terms-of-use/",
+    "projection": "Web Mercator",
+    "bounds": {
+      "west": 100,
+      "east": 140,
+      "south": 22,
+      "north": 52
+    }
+  },
+  "cities": {
+    "source": "OpenStreetMap Nominatim",
+    "url": "https://nominatim.openstreetmap.org/",
+    "note": "按城市名称一次性查询的城市级参考点，非个人精确位置；坐标已保存到配置，运行时不请求外部服务。"
+  }
+}

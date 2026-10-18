@@ -746,18 +746,81 @@
     ],
     "descriptions": {
       "time": "This is how I spend my time. My biggest hobby is learning, as I am curious about almost everything.",
-      "space": "This is my travel footprint. And currently I’m living somewhere on Earth.",
+      "space": "记录我走过的城市，目前生活在北京。",
       "movies": "The statistics of Movies I have watched.",
       "music": "The statistics of Music Albums I have listened."
     },
     "space": {
-      "mapImage": "./images/reference/footprint.webp",
-      "mapAlt": "东亚旅行足迹演示地图，非个人真实旅行记录。",
+      "mapImage": "./images/maps/east-asia.svg",
+      "mapAlt": "旅行足迹地图：当前位置为北京，曾去过海伦市、杭州市、青岛市、秦皇岛市、承德市、南京市、厦门市、大同市、大庆市、齐齐哈尔市。",
       "marker": {
-        "x": 59,
-        "y": 39
+        "x": 40.98,
+        "y": 45.42
       },
-      "caption": "Somewhere on Earth"
+      "caption": "北京",
+      "bounds": {
+        "west": 100,
+        "east": 140,
+        "south": 22,
+        "north": 52
+      },
+      "currentLocation": {
+        "name": "北京",
+        "latitude": 39.90571,
+        "longitude": 116.3913
+      },
+      "visitedPlaces": [
+        {
+          "name": "海伦市",
+          "latitude": 47.41645,
+          "longitude": 126.82141
+        },
+        {
+          "name": "杭州市",
+          "latitude": 30.24896,
+          "longitude": 120.20523
+        },
+        {
+          "name": "青岛市",
+          "latitude": 36.06632,
+          "longitude": 120.37777
+        },
+        {
+          "name": "秦皇岛市",
+          "latitude": 39.93675,
+          "longitude": 119.59422
+        },
+        {
+          "name": "承德市",
+          "latitude": 40.95071,
+          "longitude": 117.9567
+        },
+        {
+          "name": "南京市",
+          "latitude": 32.04383,
+          "longitude": 118.77886
+        },
+        {
+          "name": "厦门市",
+          "latitude": 24.48011,
+          "longitude": 118.08535
+        },
+        {
+          "name": "大同市",
+          "latitude": 40.09232,
+          "longitude": 113.29527
+        },
+        {
+          "name": "大庆市",
+          "latitude": 46.5969,
+          "longitude": 125.10148
+        },
+        {
+          "name": "齐齐哈尔市",
+          "latitude": 47.33924,
+          "longitude": 123.94954
+        }
+      ]
     }
   }
 }
