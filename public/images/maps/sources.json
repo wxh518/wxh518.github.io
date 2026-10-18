@@ -1,10 +1,13 @@
 {
   "basemap": {
-    "source": "Natural Earth 1:110m land",
-    "url": "https://naturalearth.s3.amazonaws.com/110m_physical/ne_110m_land.zip",
+    "source": "Natural Earth 1:50m land, lakes, rivers and country boundary lines",
+    "url": "https://github.com/nvkelso/natural-earth-vector/tree/master/geojson",
     "license": "Public domain",
     "terms": "https://www.naturalearthdata.com/about/terms-of-use/",
     "projection": "Web Mercator",
+    "generator": "scripts/generate-footprint-map.mjs",
+    "datasets": ["ne_50m_land", "ne_50m_lakes", "ne_50m_rivers_lake_centerlines", "ne_50m_admin_0_boundary_lines_land"],
+    "note": "使用真实海岸线、河流与湖泊；淡绿色颗粒为视觉纹理，并非实测地形高程。SVG 在本地生成，线上不请求第三方地图服务。",
     "bounds": {
       "west": 100,
       "east": 140,

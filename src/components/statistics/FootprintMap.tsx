@@ -20,10 +20,8 @@ export function FootprintMap({ space, profile }: { space: Space; profile: Profil
         <span className="footprint-current-pulse" />{profile.avatarImage ? <img src={profile.avatarImage} alt="" loading="lazy" /> : <span>{profile.name[0]}</span>}
       </button>
       {active && <span className={`footprint-location-tooltip ${active.name === current.name ? 'is-current' : ''}`} style={position(active)} role="status">{active.name}{active.name === current.name ? ' · 当前所在地' : ' · 曾经去过'}</span>}
-      <span className="footprint-caption">当前位置 · {current.name}</span>
+      <span className="footprint-caption">{space.caption || current.name}</span>
+      <a className="footprint-source" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" aria-label="地图数据来源：Natural Earth 与 OpenStreetMap">© OpenStreetMap</a>
     </div>
-    <div className="footprint-places-heading"><span>去过的城市</span><span>{places.length} 座</span></div>
-    <div className="footprint-place-list" aria-label="曾经去过的城市">{places.map(place => <button key={place.name} type="button" className={active?.name === place.name ? 'is-active' : ''} aria-pressed={active?.name === place.name} onMouseEnter={() => setActive(place)} onMouseLeave={() => setActive(null)} onFocus={() => setActive(place)} onBlur={() => setActive(null)} onClick={() => setActive(place)}>{place.name}</button>)}</div>
-    <div className="footprint-source"><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener noreferrer">Natural Earth</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a></div>
   </div>
 }
