@@ -12,16 +12,16 @@
     "tagline": "A little universe of things I love.",
     "roles": [
       {
-        "label": "Creative Developer",
+        "label": "Desktop Developer",
         "target": "code"
       },
       {
-        "label": "Web Explorer",
+        "label": "Chromium Developer",
         "target": "code"
       },
       {
-        "label": "Game Maker",
-        "target": "game"
+        "label": "Qt Developer",
+        "target": "code"
       },
       {
         "label": "Story Collector",
@@ -45,12 +45,12 @@
       {
         "id": "github",
         "name": "GitHub",
-        "handle": "@yourname",
+        "handle": "@wxh518",
         "metric": 128,
         "unit": "repositories",
         "color": "#9d174d",
         "description": "Small experiments, useful tools, and things built out of curiosity.",
-        "url": "",
+        "url": "https://github.com/wxh518",
         "metrics": [
           {
             "value": 128,
@@ -438,52 +438,10 @@
   },
   "skills": [
     {
-      "name": "JavaScript / TypeScript",
-      "tag": "TypeScript",
-      "level": 9,
-      "note": "从小工具到完整的交互体验，探索浏览器的可能性。"
-    },
-    {
-      "name": "React / Next.js",
-      "tag": "React",
-      "level": 9,
-      "note": "组件、状态和细节：让想法成为可以使用的产品。"
-    },
-    {
-      "name": "C# / .NET",
-      "tag": "C#",
-      "level": 7,
-      "note": "游戏原型与服务端实验。这里的熟练度为演示数据。"
-    },
-    {
-      "name": "Design / Figma",
-      "tag": "Design",
-      "level": 7,
-      "note": "关注排版、交互和每一个微小的使用体验。"
-    },
-    {
       "name": "C++",
       "tag": "C++",
       "level": 6,
       "note": "理解程序如何运行，也理解抽象背后的细节。"
-    },
-    {
-      "name": "Python",
-      "tag": "Python",
-      "level": 8,
-      "note": "分析数据、自动化重复工作，以及验证有趣的想法。"
-    },
-    {
-      "name": "Rust",
-      "tag": "Rust",
-      "level": 4,
-      "note": "仍在学习中。享受用不同的方式思考问题。"
-    },
-    {
-      "name": "Unity / Game Design",
-      "tag": "Unity",
-      "level": 6,
-      "note": "做一点小小的游戏，给日常留一点玩心。"
     },
     {
       "name": "Algorithms",
@@ -492,10 +450,22 @@
       "note": "从问题出发，理解数据结构与算法。"
     },
     {
-      "name": "Web Audio",
-      "tag": "Web Audio",
-      "level": 6,
-      "note": "用浏览器探索声音与音乐的可能性。"
+      "name": "JavaScript / TypeScript",
+      "tag": "TypeScript",
+      "level": 9,
+      "note": "从小工具到完整的交互体验，探索浏览器的可能性。"
+    },
+    {
+      "name": "Python",
+      "tag": "Python",
+      "level": 8,
+      "note": "分析数据、自动化重复工作，以及验证有趣的想法。"
+    },
+    {
+      "name": "React / Next.js",
+      "tag": "React",
+      "level": 9,
+      "note": "组件、状态和细节：让想法成为可以使用的产品。"
     }
   ],
   "books": [
