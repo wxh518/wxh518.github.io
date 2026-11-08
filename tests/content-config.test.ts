@@ -4,11 +4,7 @@ import homepageFile from '../content/homepage.json'
 import postsFile from '../content/posts.json'
 import { validateContent } from '../scripts/content-validation'
 import { createConfigContentService } from '../src/services/config-content-service'
-import type { HomepageContent } from '../src/types/content'
-
-function fixture() {
-  return { homepage: structuredClone(homepageFile), articles: structuredClone(postsFile) }
-}
+import { createConfigFixture as fixture, createContentFixture } from './fixtures/content'
 
 test('JSON configuration satisfies schemas and cross-field constraints', () => {
   assert.deepEqual(validateContent(homepageFile, postsFile), [])
@@ -32,9 +28,9 @@ test('stable IDs, article slugs and skill tags cannot be duplicated', () => {
   homepage.profile.socials[1].id = homepage.profile.socials[0].id
   homepage.skills[1].tag = homepage.skills[0].tag
   articles.posts[1].slug = articles.posts[0].slug
-  const errors = validateContent(homepage, articles).join('\n')
-  for (const field of ['projects', 'sections', 'socials', 'skills', 'posts.json/posts']) {
-    assert.ok(errors.includes(field), `缺少重复标识校验：${field}`)
+  const errors = validateContent(homepage, articles)
+  for (const path of ['homepage.json/projects', 'homepage.json/sections', 'homepage.json/profile/socials', 'homepage.json/skills', 'posts.json/posts/1']) {
+    assert.ok(errors.some(error => error.startsWith(`content/${path}`) && error.includes('标识或名称重复')), `缺少重复标识校验：${path}`)
   }
 })
 
@@ -59,20 +55,24 @@ test('charts reject mismatched series, unsorted ages, incorrect percentages and 
   assert.match(errors, /\/movies/)
 })
 
-test('optional project links are validated and empty blog lists are supported', () => {
+test('zero, one or multiple articles satisfy the publication schema', () => {
+  const { homepage, articles } = fixture()
+  for (const count of [0, 1, 2]) {
+    assert.deepEqual(validateContent(homepage, { ...articles, posts: articles.posts.slice(0, count) }), [])
+  }
+})
+
+test('optional project links are validated', () => {
   const { homepage, articles } = fixture()
   const first = homepage.projects.work[0]
-  homepage.projects.work[0] = { ...first, url: 'https://example.com/project', image: './images/project.webp' } as typeof first
-  articles.posts = []
+  homepage.projects.work[0] = { ...first, url: 'https://example.com/project', image: './images/project.webp' }
   assert.deepEqual(validateContent(homepage, articles), [])
-  homepage.projects.work[0] = { ...first, url: 'javascript:alert(1)' } as typeof first
+  homepage.projects.work[0] = { ...first, url: 'javascript:alert(1)' }
   assert.ok(validateContent(homepage, articles).some(error => error.includes('/projects/work/0/url')))
 })
 
 test('configuration adapter isolates input and output mutations and preserves public contracts', async () => {
-  const { homepage, articles } = fixture()
-  const { $schema: _schema, ...data } = homepage
-  const source = { homepage: data as HomepageContent, posts: articles.posts }
+  const source = createContentFixture()
   const service = createConfigContentService(source)
   const originalName = source.homepage.profile.name
   const originalTitle = source.posts[0].title
@@ -88,7 +88,7 @@ test('configuration adapter isolates input and output mutations and preserves pu
   assert.equal('body' in summaries[0], false)
   summaries[0].tags.push('changed output')
   assert.equal((await service.getPosts())[0].tags.includes('changed output'), false)
-  const post = (await service.getPost(articles.posts[0].slug))!
+  const post = (await service.getPost(source.posts[0].slug))!
   post.body = 'changed output'
   assert.notEqual((await service.getPost(post.slug))!.body, post.body)
   assert.equal(await service.getPost('not-found'), null)

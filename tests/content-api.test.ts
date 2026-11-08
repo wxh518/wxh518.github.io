@@ -1,14 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { createApp } from '../worker/index'
-import homepageFile from '../content/homepage.json'
-import postsFile from '../content/posts.json'
-import { configContentService } from '../src/services/config-content-service'
+import { createConfigContentService } from '../src/services/config-content-service'
 import { createHttpContentService } from '../src/services/http-content-service'
+import { createContentFixture } from './fixtures/content'
 
-const { $schema: _schema, ...homepageContent } = homepageFile
-const { posts } = postsFile
-const app = createApp()
+const { homepage: homepageContent, posts } = createContentFixture()
+const service = createConfigContentService({ homepage: homepageContent, posts })
+const app = createApp(service)
 const origin = 'https://wxh518.github.io'
 const env = { ALLOWED_ORIGINS: `${origin},http://127.0.0.1:5173` }
 const request = (path: string, init?: RequestInit) => app.request(`https://api.example.test${path}`, init, env)
@@ -69,7 +68,7 @@ test('write requests are rejected, HEAD and health remain available', async () =
 
 test('repository errors return a generic uncached 500 and keep CORS headers', async t => {
   t.mock.method(console, 'error', () => {})
-  const broken = createApp({ ...configContentService, async getHomepage() { throw new Error('private implementation detail') } })
+  const broken = createApp({ ...service, async getHomepage() { throw new Error('private implementation detail') } })
   const response = await broken.request('/api/homepage', { headers: { Origin: origin } }, env)
   assert.equal(response.status, 500)
   assert.equal(response.headers.get('cache-control'), 'no-store')
@@ -85,4 +84,15 @@ test('frontend HTTP adapter consumes the real Hono routes end to end', async () 
   assert.equal(summaries.length, posts.length)
   assert.deepEqual(await client.getPost(summaries[0].slug), posts[0])
   assert.equal(await client.getPost('missing'), null)
+})
+
+test('the HTTP client lists zero or one published article without requiring demo posts', async () => {
+  const [post] = posts
+  for (const publishedPosts of [[], [post]]) {
+    const site = createApp(createConfigContentService({ homepage: homepageContent, posts: publishedPosts }))
+    const client = createHttpContentService('https://api.example.test/api/', async (input, init) => site.fetch(new Request(input, init), env))
+    const { body: _body, ...summary } = post
+    assert.deepEqual(await client.getPosts(), publishedPosts.length ? [summary] : [])
+    assert.deepEqual(await client.getPost(post.slug), publishedPosts.length ? post : null)
+  }
 })

@@ -1,11 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { configContentSource } from '../src/services/config-content-service'
 import { contentFingerprint, createGitHubPublisher, preparePublication, PublishConflict } from '../src/services/github-content'
 import type { ContentDocument } from '../src/types/admin'
+import { createContentFixture as source } from './fixtures/content'
 
 const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII='
-function source() { return structuredClone(configContentSource) }
 function github(remote: ContentDocument, racing = false) {
   const calls: { method: string; path: string; body: Record<string, unknown>; auth: string | null }[] = []
   const fetcher = (async (input, init) => {

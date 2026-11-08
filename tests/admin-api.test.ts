@@ -6,6 +6,8 @@ import { createApp } from '../worker/index'
 import type { Database, Statement } from '../worker/database'
 import { hashPassword } from '../worker/auth'
 import type { ContentDocument, EditorState } from '../src/types/admin'
+import { configContentSource } from '../src/services/config-content-service'
+import { createContentFixture } from './fixtures/content'
 
 // 真实 SQLite 运行迁移、原子更新和触发器，不用会掩盖 SQL 错误的内存假数据。
 class TestDatabase implements Database {
@@ -32,8 +34,14 @@ class TestDatabase implements Database {
 }
 const password = 'a-long-test-only-password'
 const origin = 'https://wxh518.github.io'
-async function fixture() {
+async function fixture(seed: ContentDocument | null = createContentFixture()) {
   const db = new TestDatabase()
+  if (seed) {
+    const document = JSON.stringify(seed)
+    const timestamp = '2026-01-01T00:00:00Z'
+    db.sqlite.prepare('INSERT INTO content_state (id, draft, published, updated_at, published_at) VALUES (1, ?, ?, ?, ?)').run(document, document, timestamp, timestamp)
+    db.sqlite.prepare('INSERT INTO content_history (revision, document, created_at) VALUES (1, ?, ?)').run(document, timestamp)
+  }
   const app = createApp()
   const env = { DB: db, ADMIN_PASSWORD_HASH: await hashPassword(password), ALLOWED_ORIGINS: origin }
   const request = (path: string, init: RequestInit = {}, token = '') => app.request(`https://api.example.test/api${path}`, { ...init, headers: { Origin: origin, 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers } }, env)
@@ -41,6 +49,13 @@ async function fixture() {
   const write = (document: ContentDocument, revision: number, action: string, token: string) => request('/admin/content', { method: 'PUT', body: JSON.stringify({ document, revision, action }) }, token)
   return { db, request, login, write }
 }
+
+test('an uninitialized database loads the configured content regardless of its article count', async () => {
+  const { request, login } = await fixture(null)
+  const response = await request('/admin/content', {}, await login())
+  assert.equal(response.status, 200)
+  assert.deepEqual((await response.json() as EditorState).document, configContentSource)
+})
 
 test('private content requires authentication, origins and preflights are checked', async () => {
   const { request } = await fixture()
