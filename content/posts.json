@@ -3,6 +3,78 @@
   "schemaVersion": 1,
   "posts": [
     {
+      "slug": "post-qpointer",
+      "title": "QPointer",
+      "description": "QPointer的底层实现原理",
+      "publishedAt": "2026-11-15",
+      "tags": [
+        "智能指针"
+      ],
+      "readingMinutes": 1,
+      "status": "published",
+      "body": ""
+    },
+    {
+      "slug": "post-observer",
+      "title": "观察者模式",
+      "description": "观察者模式的底层实现原理",
+      "publishedAt": "2026-11-15",
+      "tags": [
+        "设计模式"
+      ],
+      "readingMinutes": 1,
+      "status": "published",
+      "body": ""
+    },
+    {
+      "slug": "post-weak-ptr",
+      "title": "std::weak_ptr",
+      "description": "std::weak_ptr的底层实现原理",
+      "publishedAt": "2026-11-15",
+      "tags": [
+        "智能指针"
+      ],
+      "readingMinutes": 1,
+      "status": "published",
+      "body": ""
+    },
+    {
+      "slug": "post-scoped-refptr",
+      "title": "base::scoped_refptr",
+      "description": "Chromium的base::scoped_refptr底层实现原理",
+      "publishedAt": "2026-11-15",
+      "tags": [
+        "智能指针"
+      ],
+      "readingMinutes": 1,
+      "status": "published",
+      "body": ""
+    },
+    {
+      "slug": "post-shared-ptr",
+      "title": "std::shared_ptr",
+      "description": "std::shared_ptr的底层实现原理",
+      "publishedAt": "2026-11-15",
+      "tags": [
+        "智能指针"
+      ],
+      "readingMinutes": 1,
+      "status": "published",
+      "body": ""
+    },
+    {
+      "slug": "post-ref-count",
+      "title": "引用计数",
+      "description": "引用计数管理资源的理解",
+      "publishedAt": "2026-11-15",
+      "tags": [
+        "引用计数"
+      ],
+      "readingMinutes": 1,
+      "status": "published",
+      "body": ""
+    },
+    {
       "slug": "post-ai-thought",
       "title": "AI时代，你是否也有些迷茫？",
       "description": "2026年AI的变化对软件行业的分析",
