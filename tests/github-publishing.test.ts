@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { contentFingerprint, createGitHubPublisher, preparePublication, PublishConflict } from '../src/services/github-content'
+import { createConfigContentService } from '../src/services/config-content-service'
 import type { ContentDocument } from '../src/types/admin'
 import { createContentFixture as source } from './fixtures/content'
 
@@ -79,6 +80,23 @@ test('a public article with an empty body is included in a batch publication', a
   assert.ok(postsBlob)
   assert.deepEqual(JSON.parse(String(postsBlob.body.content)).posts, [outline, ...original.posts])
   assert.equal(calls.at(-1)!.method, 'PATCH')
+})
+
+test('reordering alone publishes the new list order and still keeps drafts out', async () => {
+  const original = source()
+  original.posts[0].publishedAt = '2026-01-02'
+  original.posts[1].publishedAt = '2026-01-01'
+  const [newer, older] = original.posts
+  const draft = { ...newer, slug: 'private-outline', status: 'draft' as const }
+  const { client, calls } = github(original)
+  const result = await client.publish({ ...original, posts: [older, draft, newer] }, contentFingerprint(original), 'test-only-token')
+  assert.equal(result.changed, true)
+  const postsBlob = calls.find(({ path, body }) => path === '/git/blobs' && typeof body.content === 'string' && body.content.includes('./schemas/posts.schema.json'))
+  assert.ok(postsBlob)
+  const saved = JSON.parse(String(postsBlob.body.content)).posts
+  assert.deepEqual(saved, [older, newer])
+  const service = createConfigContentService({ homepage: original.homepage, posts: saved })
+  assert.deepEqual((await service.getPosts()).map(post => post.slug), [older.slug, newer.slug])
 })
 
 test('remote content conflicts cause no writes; a race never forces a branch update', async () => {

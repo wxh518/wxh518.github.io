@@ -10,7 +10,7 @@
     "schemaVersion": { "const": 1, "description": "文章配置结构版本，当前为 1；与单篇文章的发布日期无关。" },
     "posts": {
       "type": "array",
-      "description": "文章清单，支持草稿与公开文章；公开接口只返回公开文章。空数组表示暂无文章，前台列表按发布日期排序。",
+      "description": "文章清单，支持草稿与公开文章；空数组表示暂无文章。公开列表按此处的数组顺序展示，跳过草稿。",
       "items": {
         "type": "object",
         "additionalProperties": false,

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MarkdownEditor } from '../components/admin/MarkdownEditor'
-import { ArrowUpRight, BookOpen, Check, Code2, Download, Eye, FileText, Globe, LayoutGrid, Link2, Plus, Save, Settings2, ShieldCheck, Trash2, Upload, UserRound } from 'lucide-react'
+import { StudioPostList } from '../components/admin/StudioPostList'
+import { ArrowUpRight, BookOpen, Check, Code2, Download, Eye, FileText, Globe, LayoutGrid, Link2, Save, Settings2, ShieldCheck, Trash2, Upload, UserRound } from 'lucide-react'
 import homepageSchema from '../../content/schemas/homepage.schema.json'
 import { configContentSource } from '../services/config-content-service'
 import { ImagePreviewContext, ImageUploadContext, SchemaField, UploadContext, type Schema } from '../components/admin/SchemaField'
@@ -56,6 +57,7 @@ export default function StaticAdmin() {
   const [reloadConfirm, setReloadConfirm] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [formKey, setFormKey] = useState(0)
+  const [editorKey, setEditorKey] = useState(0)
   const importInput = useRef<HTMLInputElement>(null)
   const previewWindow = useRef<Window | null>(null)
   const saving = useRef(false)
@@ -128,6 +130,25 @@ export default function StaticAdmin() {
 
   function update(next: ContentDocument | ((previous: ContentDocument) => ContentDocument)) { editSequence.current++; setDocument(next); setError(''); setMessage('') }
   function updatePost(change: Partial<Post>) { update(previous => ({ ...previous, posts: previous.posts.map((item, index) => index === postIndex ? { ...item, ...change } : item) })) }
+  function openPost(index: number) {
+    setSelected(index)
+    setDeleteConfirm(false)
+    setEditorKey(key => key + 1)
+  }
+  function addPost() {
+    const next: Post = { slug: `post-${Date.now().toString(36)}`, title: '未命名文章', description: '', publishedAt: localDate(), tags: [], readingMinutes: 1, status: 'draft', body: '' }
+    update(previous => ({ ...previous, posts: [next, ...previous.posts] }))
+    openPost(0)
+  }
+  function movePost(from: number, to: number) {
+    const posts = [...document.posts]
+    const [moved] = posts.splice(from, 1)
+    posts.splice(to, 0, moved)
+    // 移动行时保留当前文章和其编辑器历史；只有切换文章才重新挂载编辑器。
+    setSelected(posts.indexOf(post))
+    setDeleteConfirm(false)
+    update({ ...document, posts })
+  }
   async function save() {
     try {
       await writeStudioDraft({ document, baseline, savedAt: new Date().toISOString(), commit, images })
@@ -186,12 +207,9 @@ export default function StaticAdmin() {
       {error && <div className="admin-notice admin-error studio-multiline" role="alert">{error}</div>}{message && <div className="admin-notice admin-success" role="status"><Check size={18} /><span>{message}</span></div>}{progress && <div className="admin-notice studio-progress" role="status">{progress}</div>}
       {commit && <div className="studio-deployment" role="status"><span>{deployment || '正在查询发布进度…'}</span><a href={`${repositoryUrl}/actions?query=branch%3Amaster`} target="_blank" rel="noopener noreferrer">发布记录 ↗</a><a href={`https://wxh518.github.io/?v=${commit.slice(0, 8)}`} target="_blank" rel="noopener noreferrer">查看网站 ↗</a></div>}
       <UploadContext.Provider value={delta => setUploads(count => count + delta)}><ImageUploadContext.Provider value={uploadLocalImage}><ImagePreviewContext.Provider value={src => images[src] || src}><fieldset className="admin-edit-region" disabled={blocked}>
-      {tab === 'posts' && <div className="studio-writing"><section className="studio-post-list admin-card"><div className="admin-array-heading"><h2>我的文章 <small>{document.posts.length}</small></h2><button onClick={() => {
-        const next: Post = { slug: `post-${Date.now().toString(36)}`, title: '未命名文章', description: '', publishedAt: localDate(), tags: [], readingMinutes: 1, status: 'draft', body: '' }
-        update(previous => ({ ...previous, posts: [next, ...previous.posts] })); setSelected(0); setDeleteConfirm(false)
-      }}><Plus size={15} />写文章</button></div>{document.posts.map((item, index) => <button key={`${index}-${item.slug}`} className={`studio-post-choice ${postIndex === index ? 'selected' : ''}`} onClick={() => { setSelected(index); setDeleteConfirm(false) }}><strong>{item.title || '未命名文章'}</strong><span>{item.status === 'draft' ? '本机草稿' : '公开文章'} · {item.publishedAt}</span></button>)}{!document.posts.length && <p>点击“写文章”，开始第一篇记录。</p>}</section>
+      {tab === 'posts' && <div className="studio-writing"><StudioPostList posts={document.posts} selected={postIndex} onSelect={index => { if (index !== postIndex) openPost(index) }} onCreate={addPost} onMove={movePost} />
       {post && <section className="studio-composer admin-card"><div className="studio-post-meta"><label>文章标题<input aria-label="文章标题" value={post.title} onChange={event => updatePost({ title: event.target.value })} /></label><label>摘要<textarea aria-label="文章摘要" rows={2} value={post.description} onChange={event => updatePost({ description: event.target.value })} /></label><div className="studio-meta-grid"><label>文章地址<input aria-label="文章地址" value={post.slug} onChange={event => updatePost({ slug: event.target.value })} /><small>英文、数字和连字符；发布后保持稳定。</small></label><label>发布日期<input aria-label="发布日期" type="date" value={post.publishedAt} onChange={event => updatePost({ publishedAt: event.target.value })} /></label><label>阅读分钟数<input aria-label="阅读分钟数" type="number" min={1} value={post.readingMinutes} onChange={event => updatePost({ readingMinutes: Math.max(1, Number(event.target.value)) })} /></label><label>文章状态<select aria-label="文章状态" value={post.status || 'published'} onChange={event => updatePost({ status: event.target.value as Post['status'] })}><option value="draft">草稿 · 仅此浏览器</option><option value="published">公开 · 随网站发布</option></select></label></div><label>标签（每行一个）<textarea aria-label="文章标签" rows={2} value={post.tags.join('\n')} onChange={event => updatePost({ tags: event.target.value ? event.target.value.split('\n') : [] })} onBlur={() => updatePost({ tags: [...new Set(post.tags.map(tag => tag.trim()).filter(Boolean))] })} /></label></div>
-      <MarkdownEditor key={`${formKey}:${postIndex}`} value={post.body} images={images} onChange={body => updatePost({ body })} onImageUpload={uploadLocalImage} onUploadCount={delta => setUploads(count => count + delta)} onError={reportError} /><div className="studio-post-end"><span>{post.body.length.toLocaleString()} 字符</span><button className="admin-danger" onClick={() => setDeleteConfirm(true)}><Trash2 size={14} />删除文章</button></div>{deleteConfirm && <div className="admin-confirm"><p>删除《{post.title}》？删除后需点击发布网站才会从线上移除。操作前可在“发布与备份”导出草稿。</p><button onClick={() => { update(previous => ({ ...previous, posts: previous.posts.filter((_, index) => index !== postIndex) })); setSelected(0); setDeleteConfirm(false) }}>确认删除</button><button onClick={() => setDeleteConfirm(false)}>取消</button></div>}</section>}</div>}
+      <MarkdownEditor key={`${formKey}:${editorKey}`} value={post.body} images={images} onChange={body => updatePost({ body })} onImageUpload={uploadLocalImage} onUploadCount={delta => setUploads(count => count + delta)} onError={reportError} /><div className="studio-post-end"><span>{post.body.length.toLocaleString()} 字符</span><button className="admin-danger" onClick={() => setDeleteConfirm(true)}><Trash2 size={14} />删除文章</button></div>{deleteConfirm && <div className="admin-confirm"><p>删除《{post.title}》？删除后需点击发布网站才会从线上移除。操作前可在“发布与备份”导出草稿。</p><button onClick={() => { update(previous => ({ ...previous, posts: previous.posts.filter((_, index) => index !== postIndex) })); openPost(0) }}>确认删除</button><button onClick={() => setDeleteConfirm(false)}>取消</button></div>}</section>}</div>}
       {tab !== 'posts' && tab !== 'settings' && <div className="admin-card" key={formKey}>{tab === 'profile' && <SchemaField schema={schema.properties!.isDemo} root={schema} value={document.homepage.isDemo} name="isDemo" path="isDemo" token="" required onChange={value => update(previous => ({ ...previous, homepage: { ...previous.homepage, isDemo: Boolean(value) } }))} />}<SchemaField schema={schema.properties![tab]} root={schema} value={document.homepage[tab as keyof HomepageContent]} name={tab} path={tab} token="" required onChange={value => update(previous => {
         const homepage = { ...previous.homepage, [tab]: value } as HomepageContent
         if (tab === 'sections') { const enabled = new Set(homepage.sections.filter(section => section.enabled).map(section => section.id)); homepage.profile = { ...homepage.profile, roles: homepage.profile.roles.filter(role => enabled.has(role.target)) } }
