@@ -51,6 +51,18 @@
       "body": ""
     },
     {
+      "slug": "post-crtp",
+      "title": "CRTP",
+      "description": "CRTP设计手法",
+      "publishedAt": "2026-11-15",
+      "tags": [
+        "设计模式"
+      ],
+      "readingMinutes": 1,
+      "status": "published",
+      "body": ""
+    },
+    {
       "slug": "post-shared-ptr",
       "title": "std::shared_ptr",
       "description": "std::shared_ptr的底层实现原理",
