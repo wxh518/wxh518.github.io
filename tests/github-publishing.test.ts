@@ -69,6 +69,18 @@ test('a publication keeps unrelated repository files and advances the branch ato
   assert.deepEqual(calls.at(-1)!.body, { sha: 'new-commit', force: false })
 })
 
+test('a public article with an empty body is included in a batch publication', async () => {
+  const original = source()
+  const outline = { ...original.posts[0], slug: 'title-only', title: '只写标题', body: '', status: 'published' as const }
+  const { client, calls } = github(original)
+  const result = await client.publish({ ...original, posts: [outline, ...original.posts] }, contentFingerprint(original), 'test-only-token')
+  assert.equal(result.changed, true)
+  const postsBlob = calls.find(({ path, body }) => path === '/git/blobs' && typeof body.content === 'string' && body.content.includes('./schemas/posts.schema.json'))
+  assert.ok(postsBlob)
+  assert.deepEqual(JSON.parse(String(postsBlob.body.content)).posts, [outline, ...original.posts])
+  assert.equal(calls.at(-1)!.method, 'PATCH')
+})
+
 test('remote content conflicts cause no writes; a race never forces a branch update', async () => {
   const original = source()
   const remote = source(); remote.homepage.profile.name = '其他设备修改'

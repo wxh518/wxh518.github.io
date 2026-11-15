@@ -87,7 +87,7 @@ test('frontend HTTP adapter consumes the real Hono routes end to end', async () 
 })
 
 test('the HTTP client lists zero or one published article without requiring demo posts', async () => {
-  const [post] = posts
+  const post = { ...posts[0], body: '' }
   for (const publishedPosts of [[], [post]]) {
     const site = createApp(createConfigContentService({ homepage: homepageContent, posts: publishedPosts }))
     const client = createHttpContentService('https://api.example.test/api/', async (input, init) => site.fetch(new Request(input, init), env))
